@@ -1,0 +1,1943 @@
+{
+  "info": {
+    "_postman_id": "gym-manager-collection",
+    "name": "Gym Manager API",
+    "description": "Comprehensive API Collection for Gym Manager Application",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phoneNumber\": \"{{phoneNumber}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/send-otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "send-otp"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify OTP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.environment.set(\"authToken\", jsonData.data.token);",
+                  "    console.log(\"Token set:\", jsonData.data.token);",
+                  "}",
+                  "if (jsonData.data && jsonData.data.user) {",
+                  "    pm.environment.set(\"userId\", jsonData.data.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phoneNumber\": \"{{phoneNumber}}\",\n    \"otp\": \"{{otp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/verify-otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "verify-otp"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"{{userName}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upgrade to Owner",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/upgrade-to-owner",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "upgrade-to-owner"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Users (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users?page=1&limit=10&search=&role=&includeDeleted=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search by name or mobile number"
+                },
+                {
+                  "key": "role",
+                  "value": "",
+                  "description": "Filter by role (USER, OWNER, ADMIN)"
+                },
+                {
+                  "key": "includeDeleted",
+                  "value": "false",
+                  "description": "Include soft-deleted users"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{userId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"{{userName}}\",\n    \"roles\": [\"USER\", \"ADMIN\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{userId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{userId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Restore User (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id/restore",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":id",
+                "restore"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{userId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Manage Role (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"role\": \"{{role}}\",\n    \"action\": \"add\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/:id/role",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":id",
+                "role"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{userId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Extended Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":id",
+                "profile"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "me"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Gyms",
+      "item": [
+        {
+          "name": "Create Gym",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.id) {",
+                  "    pm.environment.set(\"gymId\", jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"{{gymName}}\",\n    \"address\": \"{{gymAddress}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/gyms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gyms"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Gyms",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gyms?page=1&limit=10&ownerId=&verified=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gyms"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "ownerId",
+                  "value": ""
+                },
+                {
+                  "key": "verified",
+                  "value": "",
+                  "description": "true/false (Admin only)"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Owned Gyms",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gyms/me/owned",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gyms",
+                "me",
+                "owned"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Gym By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gyms/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gyms",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{gymId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Gym",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"{{gymName}}\",\n    \"address\": \"{{gymAddress}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/gyms/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gyms",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{gymId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Gym (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gyms/:id/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gyms",
+                ":id",
+                "verify"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{gymId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unverify Gym (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gyms/:id/unverify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gyms",
+                ":id",
+                "unverify"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{gymId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Gym Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gyms/:id/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gyms",
+                ":id",
+                "stats"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{gymId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Gym",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gyms/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gyms",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{gymId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Plans",
+      "item": [
+        {
+          "name": "Create Plan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.id) {",
+                  "    pm.environment.set(\"planId\", jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"gymId\": \"{{gymId}}\",\n    \"name\": \"{{planName}}\",\n    \"description\": \"{{planDescription}}\",\n    \"durationValue\": {{planDurationValue}},\n    \"durationUnit\": \"{{planDurationUnit}}\",\n    \"price\": {{planPrice}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/plans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plans"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Plans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/plans?gymId={{gymId}}&isActive=&search=&page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plans"
+              ],
+              "query": [
+                {
+                  "key": "gymId",
+                  "value": "{{gymId}}"
+                },
+                {
+                  "key": "isActive",
+                  "value": ""
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Active Plans By Gym",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/plans/active?gymId={{gymId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plans",
+                "active"
+              ],
+              "query": [
+                {
+                  "key": "gymId",
+                  "value": "{{gymId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Plan By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/plans/:planId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plans",
+                ":planId"
+              ],
+              "variable": [
+                {
+                  "key": "planId",
+                  "value": "{{planId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Plan",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"{{planName}}\",\n    \"price\": {{planPrice}},\n    \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/plans/:planId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plans",
+                ":planId"
+              ],
+              "variable": [
+                {
+                  "key": "planId",
+                  "value": "{{planId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Plan",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/plans/:planId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plans",
+                ":planId"
+              ],
+              "variable": [
+                {
+                  "key": "planId",
+                  "value": "{{planId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Subscriptions",
+      "item": [
+        {
+          "name": "Create Subscription",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.subscription && jsonData.data.subscription.id) {",
+                  "    pm.environment.set(\"subscriptionId\", jsonData.data.subscription.id);",
+                  "}",
+                  "if (jsonData.data && jsonData.data.orderId) {",
+                  "    pm.environment.set(\"razorpayOrderId\", jsonData.data.orderId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"planId\": \"{{planId}}\",\n    \"gymId\": \"{{gymId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Console Subscription",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.id) {",
+                  "    pm.environment.set(\"subscriptionId\", jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"{{memberName}}\",\n    \"mobileNumber\": \"{{memberMobile}}\",\n    \"planId\": \"{{planId}}\",\n    \"gymId\": \"{{gymId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions/console",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions",
+                "console"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Subscriptions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions/my-subscriptions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions",
+                "my-subscriptions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Subscriptions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions?gymId={{gymId}}&userId=&status=&page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions"
+              ],
+              "query": [
+                {
+                  "key": "gymId",
+                  "value": "{{gymId}}"
+                },
+                {
+                  "key": "userId",
+                  "value": ""
+                },
+                {
+                  "key": "status",
+                  "value": ""
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Activate Subscription (Manual)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions/:id/activate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions",
+                ":id",
+                "activate"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{subscriptionId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Verify Payment",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"razorpay_order_id\": \"{{razorpayOrderId}}\",\n    \"razorpay_payment_id\": \"pay_dummy_id\",\n    \"razorpay_signature\": \"dummy_signature\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "verify"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test Payment Flow",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (jsonData.data) {",
+                  "    if (jsonData.data.subscriptionId) pm.environment.set(\"subscriptionId\", jsonData.data.subscriptionId);",
+                  "    if (jsonData.data.paymentId) pm.environment.set(\"paymentId\", jsonData.data.paymentId);",
+                  "    if (jsonData.data.orderId) pm.environment.set(\"razorpayOrderId\", jsonData.data.orderId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"userId\": \"{{userId}}\",\n    \"planId\": \"{{planId}}\",\n    \"gymId\": \"{{gymId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/test/flow",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "test",
+                "flow"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Payments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payments?page=1&limit=10&gymId=&userId=&source=&status=&settlementStatus=&startDate=&endDate=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "gymId",
+                  "value": ""
+                },
+                {
+                  "key": "userId",
+                  "value": ""
+                },
+                {
+                  "key": "source",
+                  "value": ""
+                },
+                {
+                  "key": "status",
+                  "value": ""
+                },
+                {
+                  "key": "settlementStatus",
+                  "value": ""
+                },
+                {
+                  "key": "startDate",
+                  "value": ""
+                },
+                {
+                  "key": "endDate",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Attendance",
+      "item": [
+        {
+          "name": "Get All Attendance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/attendance?gymId=&userId=&startDate=&endDate=&page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendance"
+              ],
+              "query": [
+                {
+                  "key": "gymId",
+                  "value": ""
+                },
+                {
+                  "key": "userId",
+                  "value": ""
+                },
+                {
+                  "key": "startDate",
+                  "value": ""
+                },
+                {
+                  "key": "endDate",
+                  "value": ""
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check In",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.id) {",
+                  "    pm.environment.set(\"attendanceId\", jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/attendance/gym/:gymId/check-in",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendance",
+                "gym",
+                ":gymId",
+                "check-in"
+              ],
+              "variable": [
+                {
+                  "key": "gymId",
+                  "value": "{{gymId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check Out",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/attendance/:attendanceId/check-out",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendance",
+                ":attendanceId",
+                "check-out"
+              ],
+              "variable": [
+                {
+                  "key": "attendanceId",
+                  "value": "{{attendanceId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Check In (Owner/Admin)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"accessCode\": \"{{accessCode}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/attendance/gym/:gymId/verify-check-in",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendance",
+                "gym",
+                ":gymId",
+                "verify-check-in"
+              ],
+              "variable": [
+                {
+                  "key": "gymId",
+                  "value": "{{gymId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?userId=&type=&isRead=&page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": ""
+                },
+                {
+                  "key": "type",
+                  "value": ""
+                },
+                {
+                  "key": "isRead",
+                  "value": ""
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Notification Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/:id/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                ":id",
+                "read"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "notification_id"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark All Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "read-all"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Settlements",
+      "item": [
+        {
+          "name": "Create Settlement (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"gymId\": \"{{gymId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/settlements",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settlements"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Settlements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/settlements?gymId={{gymId}}&status=&startDate=&endDate=&page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settlements"
+              ],
+              "query": [
+                {
+                  "key": "gymId",
+                  "value": "{{gymId}}"
+                },
+                {
+                  "key": "status",
+                  "value": ""
+                },
+                {
+                  "key": "startDate",
+                  "value": ""
+                },
+                {
+                  "key": "endDate",
+                  "value": ""
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Unsettled Amount",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/settlements/unsettled?gymId={{gymId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settlements",
+                "unsettled"
+              ],
+              "query": [
+                {
+                  "key": "gymId",
+                  "value": "{{gymId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Settlement By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/settlements/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settlements",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "settlement_id"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Process Settlement (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"transactionId\": \"{{transactionId}}\",\n    \"notes\": \"{{settlementNotes}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/settlements/:id/process",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settlements",
+                ":id",
+                "process"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "settlement_id"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "WhatsApp",
+      "item": [
+        {
+          "name": "Check User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-internal-secret",
+                "value": "{{internalSecret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/whatsapp/user?mobile={{phoneNumber}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "whatsapp",
+                "user"
+              ],
+              "query": [
+                {
+                  "key": "mobile",
+                  "value": "{{phoneNumber}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Gyms",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-internal-secret",
+                "value": "{{internalSecret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/whatsapp/gyms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "whatsapp",
+                "gyms"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Plans",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-internal-secret",
+                "value": "{{internalSecret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/whatsapp/plans?gymId={{gymId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "whatsapp",
+                "plans"
+              ],
+              "query": [
+                {
+                  "key": "gymId",
+                  "value": "{{gymId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Subscribe",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-internal-secret",
+                "value": "{{internalSecret}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"mobile\": \"{{phoneNumber}}\",\n    \"planId\": \"{{planId}}\",\n    \"gymId\": \"{{gymId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/whatsapp/subscribe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "whatsapp",
+                "subscribe"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check Subscription",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-internal-secret",
+                "value": "{{internalSecret}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/whatsapp/subscription?mobile={{phoneNumber}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "whatsapp",
+                "subscription"
+              ],
+              "query": [
+                {
+                  "key": "mobile",
+                  "value": "9876543210"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "API Keys",
+      "item": [
+        {
+          "name": "Create API Key",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"{{apiKeyName}}\",\n    \"key\": \"{{apiKeyValue}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api-keys",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api-keys"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All API Keys",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-keys",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api-keys"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle API Key Status",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"isActive\": {{apiKeyIsActive}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api-keys/:id/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api-keys",
+                ":id",
+                "status"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{apiKeyId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete API Key",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-keys/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api-keys",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{apiKeyId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "gymId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "planId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "subscriptionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "attendanceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "razorpayOrderId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "internalSecret",
+      "value": "your-internal-secret-here",
+      "type": "string"
+    },
+    {
+      "key": "phoneNumber",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otp",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "role",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "gymName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "gymAddress",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "planName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "planDescription",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "planDurationValue",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "planDurationUnit",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "planPrice",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "memberName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "memberMobile",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "accessCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "transactionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "settlementNotes",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "apiKeyName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "apiKeyValue",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "apiKeyIsActive",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "apiKeyId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

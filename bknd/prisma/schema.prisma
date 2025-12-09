@@ -1,0 +1,255 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  mobileNumber  String?   @unique
+  email         String?   @unique
+  roles         Role[]    @default([USER])
+  gymsOwned     Gym[]          @relation("GymOwner")
+  subscriptions Subscription[]
+  attendanceLogs Attendance[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+  deletedAt     DateTime?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Gym {
+  id               String    @id @default(cuid())
+  name             String
+  address          String?
+  
+  ownerId          String
+  owner            User      @relation("GymOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  verified         Boolean   @default(false)
+
+  subscriptionPlans GymSubscriptionPlan[]
+  subscriptions     Subscription[]
+  attendanceLogs    Attendance[]
+  settlements       Settlement[]
+  auditLogs         AuditLog[]
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model GymSubscriptionPlan {
+  id            String   @id @default(cuid())
+  gymId         String
+  gym           Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  
+  name          String
+  description   String?
+
+  // --- NEW: Flexible Plan Duration Fields ---
+  durationValue Int      // e.g., 1 for "1 Day" or 3 for "3 Months"
+  durationUnit  PlanType @default(MONTH) // Uses the PlanType enum (DAY, WEEK, MONTH, YEAR)
+  // ------------------------------------------
+
+  price         Int
+  isActive      Boolean  @default(true)
+  
+  subscriptions Subscription[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Subscription {
+  id     String @id @default(cuid())
+  
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  gymId  String
+  gym    Gym    @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  
+  planId String
+  plan   GymSubscriptionPlan @relation(fields: [planId], references: [id])
+
+  startDate DateTime           @default(now())
+  endDate   DateTime
+  status    SubscriptionStatus @default(ACTIVE)
+
+  // --- UPDATED: Now supports WhatsApp booking ---
+  source    SubscriptionSource @default(APP)
+
+  accessCode  String    @unique 
+  lastCheckIn DateTime?
+
+  payment        Payment?
+  attendanceLogs Attendance[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  subscriptionId    String        @unique
+  subscription      Subscription  @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  
+  amount            Int
+  method            PaymentMethod?
+  status            PaymentStatus @default(PENDING)
+
+  razorpayOrderId   String?       @unique   // <-- ADDED
+  razorpayPaymentId String?
+  razorpaySignature String?
+  
+  settlementId      String?
+  settlement        Settlement?   @relation(fields: [settlementId], references: [id])
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+model Attendance {
+  id             String        @id @default(cuid())
+  
+  // 1. Link to User (Fast history lookups)
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // 2. Link to Subscription (Know exactly which plan was used)
+  subscriptionId String
+  subscription   Subscription  @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  
+  // 3. Link to Gym (Data isolation)
+  gymId          String
+  gym            Gym           @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  
+  checkIn        DateTime      @default(now())
+  checkOut       DateTime?
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Index for speed: "Find all attendance for this user at this gym"
+  @@index([userId, gymId])
+  // Index for speed: "Find all usage for this specific subscription"
+  @@index([subscriptionId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title     String
+  message   String
+  isRead    Boolean          @default(false)
+  type      NotificationType @default(INFO)
+  
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([userId])
+}
+
+model Settlement {
+  id            String           @id @default(cuid())
+  
+  gymId         String
+  gym           Gym              @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  
+  amount        Int              // Total amount to be settled
+  status        SettlementStatus @default(PENDING)
+  
+  transactionId String?          // Bank transaction reference or UTR
+  notes         String?
+
+  payments      Payment[]
+
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([gymId])
+}
+
+enum Role {
+  ADMIN
+  OWNER
+  USER
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum SettlementStatus {
+  PENDING
+  PROCESSED
+  FAILED
+}
+
+enum PlanType {
+  DAY
+  WEEK
+  MONTH
+  YEAR
+}
+
+enum SubscriptionSource {
+  APP       // Bought by User via Mobile/Web App
+  CONSOLE   // Added by Owner manually via Dashboard
+  WHATSAPP  // Booked via WhatsApp Bot/Chat
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
+
+enum PaymentMethod {
+  CASH
+  UPI
+  CARD
+  NET_BANKING
+  CONSOLE // For manual entry via console
+  ONLINE  // General online (Razorpay etc)
+}
+
+
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String
+  entityId  String
+
+  actorId   String
+  actor     User     @relation(fields: [actorId], references: [id])
+
+  gymId     String?
+  gym       Gym?     @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  details   Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([gymId])
+  @@index([actorId])
+}

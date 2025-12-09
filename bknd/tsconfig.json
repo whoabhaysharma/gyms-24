@@ -1,0 +1,60 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2022"
+    ],
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@controllers": [
+        "src/controllers"
+      ],
+      "@controllers/*": [
+        "src/controllers/*"
+      ],
+      "@queues": [
+        "src/queues"
+      ],
+      "@queues/*": [
+        "src/queues/*"
+      ],
+      "@routes": [
+        "src/routes"
+      ],
+      "@routes/*": [
+        "src/routes/*"
+      ],
+      "@services": [
+        "src/services"
+      ],
+      "@services/*": [
+        "src/services/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

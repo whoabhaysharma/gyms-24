@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "workspaces": [
+    "ui",
+    "bknd",
+    "website",
+    "webhook"
+  ]
+}

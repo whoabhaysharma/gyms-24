@@ -1,0 +1,25 @@
+2025-12-04 20:46:33 [[32minfo[39m]: [BackendFactory] Using Mock Backend Service
+2025-12-04 20:47:25 [[32minfo[39m]: [Processor] Processing job: 50 {"type":"incoming_message"}
+2025-12-04 20:47:25 [[32minfo[39m]: [MessageHandler] Processing message {"originalFrom":"917210089184","from":"7210089184","name":"Abhay","type":"text"}
+2025-12-04 20:47:25 [[32minfo[39m]: [WhatsAppService] Marking message as read: wamid.HBgMOTE3MjEwMDg5MTg0FQIAEhgUM0FGRDQwNEM4MjBEMEY5NjE2MUQA
+2025-12-04 20:47:26 [[32minfo[39m]: [WhatsAppService] Message marked as read
+2025-12-04 20:47:26 [[32minfo[39m]: [TextHandler] Handling text message: "Hi" {"from":"7210089184","name":"Abhay"}
+2025-12-04 20:47:26 [[32minfo[39m]: [TextHandler] Greeting detected. Sending interactive menu.
+2025-12-04 20:47:26 [[32minfo[39m]: [WhatsAppService] Sending message to: 917210089184 {"content":{"messaging_product":"whatsapp","to":"917210089184","type":"interactive","interactive":{"type":"button","body":{"text":"Welcome to Gyms24, Abhay! 🏋️‍♂️\n\nYour complete gym booking platform. How can we help you today?"},"action":{"buttons":[{"type":"reply","reply":{"id":"book_membership","title":"Book Membership"}},{"type":"reply","reply":{"id":"my_memberships","title":"My Memberships"}}]}}}}
+2025-12-04 20:47:27 [[32minfo[39m]: [WhatsAppService] Message sent successfully {"messageId":"wamid.HBgMOTE3MjEwMDg5MTg0FQIAERgSMEMzQzc0RUU5Mjk2NzlDMTZEAA=="}
+2025-12-04 20:47:32 [[32minfo[39m]: [Processor] Processing job: 51 {"type":"incoming_message"}
+2025-12-04 20:47:32 [[32minfo[39m]: [MessageHandler] Processing message {"originalFrom":"917210089184","from":"7210089184","name":"Abhay","type":"interactive"}
+2025-12-04 20:47:32 [[32minfo[39m]: [WhatsAppService] Marking message as read: wamid.HBgMOTE3MjEwMDg5MTg0FQIAEhgUM0E4MEU3NDhDNDE1RDIyRkM1RkUA
+2025-12-04 20:47:33 [[32minfo[39m]: [WhatsAppService] Message marked as read
+2025-12-04 20:47:33 [[32minfo[39m]: [ButtonHandler] Handling button click: book_membership {"from":"7210089184","name":"Abhay"}
+2025-12-04 20:47:33 [[32minfo[39m]: [MockBackend] Generating magic link for: 7210089184
+2025-12-04 20:47:33 [[32minfo[39m]: [WhatsAppService] Sending message to: 917210089184 {"content":{"type":"interactive","interactive":{"type":"cta_url","body":{"text":"Great choice! 🎉\n\nClick the button below to securely book your membership."},"action":{"name":"cta_url","parameters":{"display_text":"Book Membership","url":"https://app.gyms24.in/booking?token=mock_token_1764861453397"}},"header":{"type":"text","text":"Start Your Fitness Journey"},"footer":{"text":"Gyms24"}}}}
+2025-12-04 20:47:34 [[32minfo[39m]: [WhatsAppService] Message sent successfully {"messageId":"wamid.HBgMOTE3MjEwMDg5MTg0FQIAERgSQkVDNTdEMEUzQ0I4OUFGNUE1AA=="}
+2025-12-04 20:47:39 [[32minfo[39m]: [WhatsAppService] Sending message to: 917210089184 {"content":"Payment Successful! 🎉\n\nYour membership is now active.\n\n🔑 *Access Code: 753184*\n\nYou can also view this code anytime by clicking \"My Memberships\"."}
+2025-12-04 20:47:40 [[32minfo[39m]: [WhatsAppService] Message sent successfully {"messageId":"wamid.HBgMOTE3MjEwMDg5MTg0FQIAERgSOEQwNkFGRTBGOEY1OEJENDAzAA=="}
+2025-12-04 20:47:54 [[32minfo[39m]: [Processor] Processing job: 52 {"type":"incoming_message"}
+2025-12-04 20:47:54 [[32minfo[39m]: [MessageHandler] Processing message {"originalFrom":"917210089184","from":"7210089184","name":"Abhay","type":"text"}
+2025-12-04 20:47:54 [[32minfo[39m]: [WhatsAppService] Marking message as read: wamid.HBgMOTE3MjEwMDg5MTg0FQIAEhgUM0FBOTE5Qzk3OTE2NzdGQ0UzQUMA
+2025-12-04 20:47:55 [[32minfo[39m]: [WhatsAppService] Message marked as read
+2025-12-04 20:47:55 [[32minfo[39m]: [TextHandler] Handling text message: "Thanks" {"from":"7210089184","name":"Abhay"}
+2025-12-04 20:47:55 [[32minfo[39m]: [TextHandler] No specific handler for message. Ignoring or sending fallback.

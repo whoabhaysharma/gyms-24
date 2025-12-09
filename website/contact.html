@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | GYMS24</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;500;700&family=Inter:wght@300;400;600&family=Black+Ops+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .page-header {
+            padding: 100px 0 60px;
+            text-align: center;
+            border-bottom: var(--border);
+        }
+        .content-section {
+            padding: 80px 0;
+            min-height: 50vh;
+        }
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .contact-card {
+            background: var(--surface);
+            padding: 40px;
+            border: 1px solid #333;
+            text-align: center;
+            transition: 0.3s;
+        }
+        .contact-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+        }
+        .icon-large {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+        .contact-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            color: var(--text-muted);
+        }
+        .contact-value {
+            font-family: 'Teko', sans-serif;
+            font-size: 2rem;
+            color: #fff;
+        }
+        .contact-value-small {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+        @media (max-width: 768px) {
+            .contact-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container nav-flex">
+            <a href="index.html" class="logo">GYMS24</a>
+            <div class="nav-links">
+                <a href="index.html" class="link">Home</a>
+                <a href="contact.html" class="link" style="color:var(--accent)">Contact</a>
+            </div>
+            <div class="auth-buttons">
+                <a href="https://wa.me/917678679983" class="btn-member">Member Booking</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="page-header">
+        <div class="container">
+            <h1>Contact Us</h1>
+            <p>We are here to help you automate your gym.</p>
+        </div>
+    </div>
+
+    <section class="content-section">
+        <div class="container">
+            <div class="contact-grid">
+
+                <div class="contact-card">
+                    <div class="icon-large">📧</div>
+                    <div class="contact-label">Email Support</div>
+                    <div class="contact-value" style="font-size: 1.8rem;">support@gyms24.in</div>
+                    <p style="margin-top: 15px;">We usually reply within 24 hours.</p>
+                </div>
+
+                <div class="contact-card">
+                    <div class="icon-large">📞</div>
+                    <div class="contact-label">Phone</div>
+                    <div class="contact-value">+91 76786 79983</div>
+                    <p style="margin-top: 15px;">Mon - Sat, 10am - 7pm IST</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container footer-grid">
+            <div>
+                <div class="logo" style="margin-bottom: 20px;">GYMS24</div>
+                <p>The operating system for modern fitness centers.</p>
+            </div>
+            <div>
+                <h4 style="color: #fff;">Company</h4>
+                <ul style="line-height: 2;">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color: #fff;">Legal</h4>
+                <ul style="line-height: 2;">
+                    <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                    <li><a href="terms.html">Terms of Service</a></li>
+                    <li><a href="refund-policy.html">Refund Policy</a></li>
+                    <li><a href="shipping-policy.html">Shipping Policy</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="container text-center" style="margin-top: 40px; opacity: 0.5;">
+            &copy; 2025 GYMS24 Platform. All rights reserved.
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,256 @@
+import { Response } from 'express';
+import { AuthenticatedRequest } from '../middleware';
+import { attendanceService } from '@services';
+import logger from '../lib/logger';
+
+import prisma from '../lib/prisma';
+
+// Get attendance history (Admin/Owner/User)
+export const getAllAttendance = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  if (!req.user?.id) {
+    return res.status(401).json({
+      success: false,
+      error: 'Not authenticated',
+    });
+  }
+
+  const { gymId, userId, startDate, endDate, page, limit } = req.query;
+  const user = req.user;
+  const userRoles = user.roles || [];
+
+  let filterGymId: string | string[] | undefined = gymId as string;
+  let filterUserId: string | undefined = userId as string;
+
+  if (userRoles.includes('ADMIN')) {
+    // Admin: filter freely
+  } else if (userRoles.includes('OWNER')) {
+    // Owner: Restricted to owned gyms
+    if (filterGymId) {
+      const gym = await prisma.gym.findUnique({
+        where: { id: filterGymId as string },
+        select: { ownerId: true }
+      });
+      if (!gym || gym.ownerId !== user.id) {
+        return res.status(403).json({ success: false, error: 'Not authorized for this gym' });
+      }
+    } else {
+      // Fetch all owned gyms
+      const myGyms = await prisma.gym.findMany({
+        where: { ownerId: user.id },
+        select: { id: true }
+      });
+      if (myGyms.length === 0) {
+        return res.status(200).json({ success: true, data: [], meta: { total: 0, page: 1, limit: 10, totalPages: 0 } });
+      }
+      filterGymId = myGyms.map(g => g.id);
+    }
+  } else {
+    // Regular User: Can only see their own attendance
+    filterUserId = user.id;
+    // User can filter by gymId if they want, but only for themselves
+  }
+
+  try {
+    const result = await attendanceService.getAllAttendanceLogs({
+      gymId: filterGymId,
+      userId: filterUserId,
+      startDate: startDate ? new Date(startDate as string) : undefined,
+      endDate: endDate ? new Date(endDate as string) : undefined,
+      page: Number(page) || 1,
+      limit: Number(limit) || 10,
+    });
+
+    return res.status(200).json({
+      success: true,
+      ...result,
+      error: null,
+    });
+  } catch (error) {
+    logger.error('Error fetching attendance history', { userId: req.user.id, error });
+    return res.status(500).json({
+      success: false,
+      data: null,
+      error: 'Failed to fetch attendance history',
+    });
+  }
+};
+
+// Check in to a gym
+export const checkIn = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  if (!req.user?.id) {
+    return res.status(401).json({
+      success: false,
+      error: 'Not authenticated',
+    });
+  }
+
+  const { gymId } = req.params;
+  logger.info('Processing gym check-in', { userId: req.user.id, gymId });
+
+  try {
+    // Create attendance record
+    const attendance = await attendanceService.checkIn(req.user.id, gymId);
+
+    logger.info('Successfully checked in', {
+      userId: req.user.id,
+      gymId,
+      attendanceId: attendance.id,
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: attendance,
+      error: null,
+    });
+  } catch (error: any) {
+    logger.error('Error checking in', { userId: req.user.id, gymId, error });
+
+    // Handle specific error cases
+    const errorMessage = error?.message || 'Failed to check in';
+
+    if (errorMessage.includes('does not have an active subscription')) {
+      return res.status(403).json({
+        success: false,
+        data: null,
+        error: 'You do not have an active subscription for this gym',
+      });
+    }
+
+    // Generic error
+    return res.status(500).json({
+      success: false,
+      data: null,
+      error: 'Failed to check in',
+    });
+  }
+};
+
+// Check out from a gym
+export const checkOut = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  if (!req.user?.id) {
+    return res.status(401).json({
+      success: false,
+      error: 'Not authenticated',
+    });
+  }
+
+  const { attendanceId } = req.params;
+  logger.info('Processing gym check-out', { userId: req.user.id, attendanceId });
+
+  try {
+    // Update attendance record with check out time
+    const updatedAttendance = await attendanceService.checkOut(req.user.id, attendanceId);
+
+    logger.info('Successfully checked out', {
+      userId: req.user.id,
+      attendanceId,
+      duration: Math.round((updatedAttendance.checkOut!.getTime() - updatedAttendance.checkIn!.getTime()) / 1000 / 60), // Duration in minutes
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: updatedAttendance,
+      error: null,
+    });
+  } catch (error: any) {
+    logger.error('Error checking out', { userId: req.user.id, attendanceId, error });
+
+    // Handle specific error cases
+    const errorMessage = error?.message || 'Failed to check out';
+
+    if (errorMessage.includes('Active attendance record not found')) {
+      return res.status(404).json({
+        success: false,
+        data: null,
+        error: 'Active attendance record not found or you are not authorized',
+      });
+    }
+
+    // Generic error
+    return res.status(500).json({
+      success: false,
+      data: null,
+      error: 'Failed to check out',
+    });
+  }
+};
+
+// Verify Check-in (Owner/Admin)
+export const verifyCheckIn = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  if (!req.user?.id) {
+    return res.status(401).json({
+      success: false,
+      error: 'Not authenticated',
+    });
+  }
+
+  const { gymId } = req.params;
+  const { accessCode } = req.body;
+
+  if (!accessCode) {
+    return res.status(400).json({
+      success: false,
+      error: 'Access code is required',
+    });
+  }
+
+  logger.info('Verifying check-in', { userId: req.user.id, gymId, accessCode });
+
+  try {
+    const { lastCheckIn, ...attendanceData } = await attendanceService.verifyAndCheckIn(accessCode, gymId);
+
+    logger.info('Successfully verified and checked in', {
+      userId: attendanceData.userId,
+      gymId,
+      attendanceId: attendanceData.id,
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: { ...attendanceData, lastCheckIn },
+      error: null,
+    });
+  } catch (error: any) {
+    logger.error('Error verifying check-in', { userId: req.user.id, gymId, error });
+
+    const errorMessage = error?.message || 'Failed to verify check-in';
+
+    if (errorMessage === 'Invalid access code') {
+      return res.status(404).json({
+        success: false,
+        error: 'Invalid access code',
+      });
+    }
+
+    if (errorMessage === 'This access code is not for this gym') {
+      return res.status(403).json({
+        success: false,
+        error: 'This access code is not valid for this gym',
+      });
+    }
+
+    if (errorMessage === 'Subscription is not active' || errorMessage === 'Subscription has expired') {
+      return res.status(403).json({
+        success: false,
+        error: errorMessage,
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to verify check-in',
+    });
+  }
+};

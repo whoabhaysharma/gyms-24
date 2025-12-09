@@ -1,0 +1,65 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: gyms24-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gyms24
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - gyms24-net
+    ports:
+      - "5432:5432"
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    container_name: gyms24-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - gyms24-net
+    restart: always
+
+  backend:
+    container_name: gyms24-backend
+    build:
+      context: ./bknd
+      dockerfile: Dockerfile
+    env_file:
+      - ./bknd/.env
+    ports:
+      - "3000:3000"
+    networks:
+      - gyms24-net
+    depends_on:
+      - postgres
+      - redis
+    restart: always
+
+  webhook:
+    container_name: gyms24-webhook
+    build:
+      context: ./webhook
+      dockerfile: Dockerfile
+    env_file:
+      - ./webhook/.env
+    ports:
+      - "4000:4000"
+    networks:
+      - gyms24-net
+    depends_on:
+      - postgres
+      - redis
+    restart: always
+
+networks:
+  gyms24-net:
+    driver: bridge
+
+volumes:
+  pgdata:

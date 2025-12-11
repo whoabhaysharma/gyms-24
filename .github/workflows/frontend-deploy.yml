@@ -15,6 +15,7 @@ jobs:
     outputs:
       ui-changed: ${{ steps.changes.outputs.ui }}
       website-changed: ${{ steps.changes.outputs.website }}
+      landing-page-changed: ${{ steps.changes.outputs.landing-page }}
     
     steps:
       - name: Checkout code
@@ -45,6 +46,14 @@ jobs:
             echo "Website changes detected"
           else
             echo "website=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check specifically for landing page changes (index.html and/or style.css)
+          if echo "$CHANGED_FILES" | grep -qE "^website/(index\.html|style\.css)$"; then
+            echo "landing-page=true" >> $GITHUB_OUTPUT
+            echo "Landing page changes detected"
+          else
+            echo "landing-page=false" >> $GITHUB_OUTPUT
           fi
 
   deploy-ui:

@@ -29,7 +29,6 @@ jobs:
         run: |
           cd ui
           npm run build
-          npm run export
 
       - name: Deploy UI to Cloudflare Pages
         uses: cloudflare/pages-action@v1

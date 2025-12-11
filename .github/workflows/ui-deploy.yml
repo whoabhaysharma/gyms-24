@@ -1,0 +1,48 @@
+name: Deploy UI
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'ui/**'
+
+jobs:
+  deploy-ui:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          cd ui
+          npm ci
+
+      - name: Build Next.js static export
+        run: |
+          cd ui
+          npm run build
+          npm run export
+
+      - name: Deploy UI to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: gyms24-ui   # make sure this matches your Cloudflare Pages project name
+          directory: ui/out        # Next.js static export output
+          gitHubToken: ""
+          skipGitHubDeployment: true
+
+      - name: Deployment Summary
+        run: |
+          echo "UI deployed successfully!"
+          echo "Changed files:"
+          git diff --name-only HEAD~1 HEAD | grep "^ui/" || echo "No file list available."

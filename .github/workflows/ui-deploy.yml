@@ -23,7 +23,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd ui
-          npm ci
+          npm install
 
       - name: Build Next.js static export
         run: |

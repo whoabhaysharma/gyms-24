@@ -1,4 +1,5 @@
 import axios from 'axios';
+import FormData from 'form-data';
 import { config } from '../config/config';
 import { logWithContext } from '../utils/logger';
 
@@ -106,6 +107,55 @@ export const sendInteractiveUrlButton = async (to: string, bodyText: string, but
         payload.interactive.footer = {
             text: footerText,
         };
+    }
+
+    return sendMessage(to, payload);
+};
+
+export const uploadMedia = async (fileBuffer: Buffer, filename: string, mimeType: string) => {
+    try {
+        logWithContext('WhatsAppService', `Uploading media: ${filename}`);
+        const form = new FormData();
+        form.append('file', fileBuffer, { filename, contentType: mimeType });
+        form.append('messaging_product', 'whatsapp');
+
+        const response = await axios.post(
+            `${config.whatsapp.baseUrl}/${config.whatsapp.apiVersion}/${config.whatsapp.phoneNumberId}/media`,
+            form,
+            {
+                headers: {
+                    Authorization: `Bearer ${config.whatsapp.token}`,
+                    ...form.getHeaders(),
+                },
+            }
+        );
+
+        logWithContext('WhatsAppService', `Media uploaded successfully`, { mediaId: response.data.id });
+        return response.data.id;
+    } catch (error: any) {
+        logWithContext('WhatsAppService', 'Error uploading media', { error: error.response?.data || error.message }, 'error');
+        throw error;
+    }
+};
+
+export const sendDocument = async (to: string, mediaSource: string, filename: string, caption?: string) => {
+    const payload: any = {
+        messaging_product: 'whatsapp',
+        to,
+        type: 'document',
+        document: {
+            filename: filename,
+        },
+    };
+
+    if (mediaSource.startsWith('http')) {
+        payload.document.link = mediaSource;
+    } else {
+        payload.document.id = mediaSource;
+    }
+
+    if (caption) {
+        payload.document.caption = caption;
     }
 
     return sendMessage(to, payload);

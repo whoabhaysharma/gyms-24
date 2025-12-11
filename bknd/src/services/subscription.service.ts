@@ -302,6 +302,23 @@ export const subscriptionService = {
             endDate: endDate
           }
         });
+
+        // Queue Invoice Generation
+        NotificationQueue.add('send-whatsapp', {
+          type: 'WHATSAPP_INVOICE',
+          payload: {
+            mobile: user.mobileNumber,
+            invoiceNumber: `INV-${payment.id.substring(0, 6).toUpperCase()}`,
+            date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+            userName: user.name,
+            gymName: payment.subscription.gym.name,
+            planName: payment.subscription.plan.name,
+            startDate: startDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+            expiryDate: endDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+            accessCode: fullSubscription?.accessCode,
+            amount: payment.amount.toLocaleString('en-IN')
+          }
+        });
       }
     } catch (error) {
       console.error('Failed to queue WhatsApp notification:', error);

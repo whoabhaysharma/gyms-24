@@ -7,6 +7,9 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
+# Install Chromium for Puppeteer
+RUN apk add --no-cache chromium
+
 # Install dependencies (including devDependencies for building)
 RUN npm install
 

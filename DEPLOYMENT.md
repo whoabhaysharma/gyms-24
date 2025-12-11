@@ -177,7 +177,7 @@ services:
     volumes:
       - ./bknd:/app
     environment:
-      - NODE_ENV=development
+
       - FRONTEND_URL=http://localhost:3001  # For local UI development
   
   webhook:

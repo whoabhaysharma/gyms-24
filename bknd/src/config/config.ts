@@ -4,8 +4,8 @@ dotenv.config();
 
 export const config = {
     port: process.env.PORT || 3000,
-    env: process.env.NODE_ENV || 'development',
-    appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+
+    appUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
 
     jwtSecret: process.env.JWT_SECRET || 'your-secret-key',
     internalSecret: process.env.INTERNAL_SECRET,

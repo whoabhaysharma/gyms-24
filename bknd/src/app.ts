@@ -14,9 +14,7 @@ app.use(express.json({
 }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
-    origin: process.env.NODE_ENV === 'production' 
-        ? [process.env.FRONTEND_URL, 'https://*.pages.dev'] 
-        : true,
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true
 }));
 app.use(helmet());
@@ -27,8 +25,8 @@ app.use('/api', routes);
 
 // Health check endpoint
 app.get('/health', (_req, res) => {
-    res.status(200).json({ 
-        status: 'ok', 
+    res.status(200).json({
+        status: 'ok',
         timestamp: new Date().toISOString(),
         service: 'gyms24-backend'
     });

@@ -1,4 +1,5 @@
 import * as WhatsAppService from '../services/whatsapp';
+import * as ButtonHandler from './buttonHandler';
 import { logWithContext } from '../utils/logger';
 
 export const handleTextMessage = async (from: string, messageBody: string, name: string, originalFrom: string) => {
@@ -18,6 +19,12 @@ export const handleTextMessage = async (from: string, messageBody: string, name:
                 { id: 'get_otp', title: 'Get OTP' }
             ]
         );
+        return;
+    }
+
+    if (lowerCaseMessage === 'otp') {
+        logWithContext('TextHandler', `OTP request detected.`);
+        await ButtonHandler.handleGetOtp(from, originalFrom);
         return;
     }
 

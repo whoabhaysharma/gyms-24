@@ -65,7 +65,7 @@ const handleMyMemberships = async (from: string, name: string, originalFrom: str
     }
 };
 
-const handleGetOtp = async (from: string, originalFrom: string) => {
+export const handleGetOtp = async (from: string, originalFrom: string) => {
     // Normalize phone number (remove 91 prefix if present)
     let normalizedMobile = from;
     if (normalizedMobile.startsWith('91') && normalizedMobile.length === 12) {

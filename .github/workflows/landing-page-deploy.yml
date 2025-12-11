@@ -22,7 +22,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: gyms24
           directory: website
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          gitHubToken: ${{ github.token }}
       
       - name: Deployment Summary
         run: |

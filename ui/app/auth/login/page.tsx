@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, ArrowRight, Phone, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowRight, Phone, ShieldCheck, ArrowLeft, MessageCircle } from 'lucide-react';
 import Lottie from 'lottie-react';
 import lottieData from './lifestyle_of_when_weighing_gym.json';
 import { authAPI } from '@/lib/api/client';
@@ -120,7 +120,7 @@ export default function LoginPage() {
             <p className="text-zinc-500 text-sm">
               {step === 'PHONE'
                 ? 'Enter your mobile number to continue'
-                : `Enter the code sent to +91 ${phoneNumber}`
+                : 'Send a message to get the OTP'
               }
             </p>
           </div>
@@ -159,6 +159,23 @@ export default function LoginPage() {
               </div>
             ) : (
               <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+
+                {/* WhatsApp Instruction Button */}
+                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
+                  <p className="text-emerald-800 text-sm font-medium mb-3">
+                    To receive your OTP, send "otp" to our WhatsApp number:
+                  </p>
+                  <a
+                    href="https://wa.me/917678679983?text=otp"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center w-full h-12 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-colors shadow-sm"
+                  >
+                    <MessageCircle className="w-5 h-5 mr-2" />
+                    Get OTP on WhatsApp
+                  </a>
+                </div>
+
                 <div className="relative">
                   <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
                   <Input

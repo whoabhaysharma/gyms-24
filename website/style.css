@@ -83,6 +83,20 @@ ul { list-style: none; }
     color: #000;
 }
 
+/* OWNER LOGIN BUTTON */
+.btn-owner-login {
+    background: transparent;
+    border: 1px solid var(--text);
+    color: var(--text);
+    padding: 8px 20px;
+    font-family: 'Teko';
+    text-transform: uppercase;
+}
+.btn-owner-login:hover {
+    background: var(--text);
+    color: #000;
+}
+
 /* UPDATED MEMBER BUTTON (Matches Theme) */
 .btn-member {
     background: #222;
@@ -426,10 +440,102 @@ footer { padding: 60px 0; border-top: var(--border); color: var(--text-muted); f
 
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
-    .hero-grid, .feature-row, .comp-grid, .faq-grid, .footer-grid, .ui-grid { grid-template-columns: 1fr; }
+    /* HEADER */
+    .nav-flex {
+        flex-direction: column;
+        gap: 15px;
+        padding-bottom: 10px;
+    }
+    .auth-buttons {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .btn-member, .btn-owner-login {
+        font-size: 1rem;
+        padding: 8px 15px;
+        margin: 0;
+    }
     .nav-links { display: none; }
-    .hero h1 { font-size: 3rem; }
-    .feature-row.reverse { direction: ltr; }
-    .comp-card-new { transform: scale(1); margin-top: 20px; }
-    .phone-display { font-size: 2rem; padding: 10px; letter-spacing: 2px; }
+
+    /* HERO */
+    .hero {
+        padding: 60px 0;
+        text-align: center;
+    }
+    .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+    .hero h1 {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+    .btn-group {
+        justify-content: center;
+    }
+    .chat-device {
+        margin: 0 auto;
+        transform: rotate(0deg);
+        max-width: 100%;
+    }
+    .chat-screen {
+        padding: 15px;
+    }
+
+    /* GENERAL SECTIONS */
+    .feature-row, .comp-grid, .faq-grid, .footer-grid, .ui-grid {
+        grid-template-columns: 1fr;
+    }
+    .feature-row {
+        gap: 40px;
+        margin-bottom: 60px;
+    }
+    .feature-row.reverse {
+        direction: ltr;
+    }
+
+    .section, .pricing, .owner-showcase, .feature-section, .comparison, .big-cta {
+        padding: 60px 0;
+    }
+
+    h2 { font-size: 2.5rem; }
+
+    /* SPECIFIC ELEMENTS */
+    .comp-card-old, .comp-card-new {
+        padding: 30px 20px;
+    }
+    .comp-card-new {
+        transform: scale(1);
+        margin-top: 20px;
+    }
+
+    .price-card {
+        padding: 30px 20px;
+    }
+
+    .phone-display {
+        font-size: 1.8rem;
+        padding: 10px;
+        letter-spacing: 2px;
+        width: 100%;
+    }
+
+    .code-checker {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .code-checker input {
+        width: 100% !important;
+    }
+
+    .big-cta h2 {
+        font-size: 3rem !important;
+    }
+
+    .footer-grid {
+        gap: 30px;
+        text-align: center;
+    }
 }

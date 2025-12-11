@@ -35,4 +35,4 @@ jobs:
             docker-compose up --build -d backend webhook
             
             # Cleanup unused images
-            docker-compose image prune -f
+            docker image prune -f

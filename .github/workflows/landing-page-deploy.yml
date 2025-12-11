@@ -10,23 +10,21 @@ on:
 jobs:
   deploy-landing-page:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # -------------------------
+      # Deploy using Wrangler v3
+      # -------------------------
       - name: Deploy Landing Page to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: gyms24         # make sure this matches your Cloudflare Pages project
-          directory: website
-          gitHubToken: ""             # disables GitHub Deployment API
-          skipGitHubDeployment: true  # fully prevents the 403 deployment issue
+          command: pages deploy website --project-name=gyms24
 
       - name: Deployment Summary
         run: |
           echo "Landing page deployed successfully!"
-          echo "Changed files:"
-          git diff --name-only HEAD~1 HEAD | grep "^website/" || echo "No file list available."

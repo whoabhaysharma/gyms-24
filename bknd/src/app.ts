@@ -26,6 +26,7 @@ app.use('/api', routes);
 app.get('/health', (_req, res) => {
     res.status(200).json({
         status: 'ok',
+        message: 'Gyms24 Backend is running smoothly',
         timestamp: new Date().toISOString(),
         service: 'gyms24-backend'
     });

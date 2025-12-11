@@ -120,7 +120,7 @@ export default function LoginPage() {
             <p className="text-zinc-500 text-sm">
               {step === 'PHONE'
                 ? 'Enter your mobile number to continue'
-                : `Enter the code sent to your number starting with 91 ${phoneNumber}`
+                : `Enter the code sent to +91 ${phoneNumber}`
               }
             </p>
           </div>

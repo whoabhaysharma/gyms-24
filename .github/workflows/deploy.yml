@@ -5,12 +5,6 @@ on:
     branches:
       - master
       - main
-  pull_request:
-    branches:
-      - master
-      - main
-    types:
-      - closed
 
 jobs:
   detect-changes:
@@ -30,13 +24,7 @@ jobs:
         id: changes
         run: |
           # Get the list of changed files
-          if [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.pull_request.merged }}" == "true" ]]; then
-            # For merged PRs, compare against base branch
-            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.merge_commit_sha }})
-          else
-            # For direct pushes, compare against previous commit
-            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
-          fi
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
           
           echo "Changed files:"
           echo "$CHANGED_FILES"
@@ -64,7 +52,7 @@ jobs:
           fi
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted  # This will run on your EC2 instance
     needs: detect-changes
     if: |
       needs.detect-changes.outputs.backend-changed == 'true' || 

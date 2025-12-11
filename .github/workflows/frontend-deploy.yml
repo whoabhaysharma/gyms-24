@@ -8,13 +8,6 @@ on:
     paths:
       - 'ui/**'
       - 'website/**'
-  pull_request:
-    branches:
-      - master  
-      - main
-    paths:
-      - 'ui/**'
-      - 'website/**'
 
 jobs:
   detect-frontend-changes:
@@ -33,11 +26,7 @@ jobs:
         id: changes
         run: |
           # Get the list of changed files
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
-          else
-            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
-          fi
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
           
           echo "Changed files:"
           echo "$CHANGED_FILES"
@@ -97,18 +86,6 @@ jobs:
           directory: ui/out
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Comment on PR with deployment URL
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '🚀 UI deployed successfully! Preview: https://gyms24-ui.pages.dev'
-            })
-
   deploy-website:
     runs-on: ubuntu-latest
     needs: detect-frontend-changes
@@ -126,15 +103,3 @@ jobs:
           projectName: gyms24-website
           directory: website
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Comment on PR with deployment URL
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '🌐 Website deployed successfully! Preview: https://gyms24-website.pages.dev'
-            })

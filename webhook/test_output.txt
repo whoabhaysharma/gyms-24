@@ -1,0 +1,13 @@
+Generating invoice...
+2025-12-13 00:28:16 [[32minfo[39m]: [InvoiceService] Generating invoice PDF with PDFMake {"invoiceNumber":"INV-TEST-001"}
+Failed to generate invoice: Error: Font 'Courier' in style 'bold' is not defined in the font section of the document definition.
+    at FontProvider.provideFont (/home/abhay/Data/personal/gyms24/gyms-24/node_modules/pdfmake/src/fontProvider.js:52:9)
+    at /home/abhay/Data/personal/gyms24/gyms-24/node_modules/pdfmake/src/textTools.js:326:27
+    at Array.forEach (<anonymous>)
+    at measure (/home/abhay/Data/personal/gyms24/gyms-24/node_modules/pdfmake/src/textTools.js:298:13)
+    at TextTools.buildInlines (/home/abhay/Data/personal/gyms24/gyms-24/node_modules/pdfmake/src/textTools.js:32:17)
+    at DocMeasure.measureLeaf (/home/abhay/Data/personal/gyms24/gyms-24/node_modules/pdfmake/src/docMeasure.js:238:28)
+    at /home/abhay/Data/personal/gyms24/gyms-24/node_modules/pdfmake/src/docMeasure.js:59:30
+    at StyleContextStack.auto (/home/abhay/Data/personal/gyms24/gyms-24/node_modules/pdfmake/src/styleContextStack.js:102:15)
+    at DocMeasure.measureNode (/home/abhay/Data/personal/gyms24/gyms-24/node_modules/pdfmake/src/docMeasure.js:44:25)
+    at DocMeasure.measureVerticalContainer (/home/abhay/Data/personal/gyms24/gyms-24/node_modules/pdfmake/src/docMeasure.js:292:19)

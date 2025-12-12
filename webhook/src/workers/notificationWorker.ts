@@ -26,7 +26,11 @@ export const startNotificationWorker = () => {
                 }
             }
         } catch (error: any) {
-            logWithContext('NotificationWorker', 'Job failed', { error: error.message }, 'error');
+            logWithContext('NotificationWorker', 'Job failed', {
+                jobName: job.name,
+                error: error.message,
+                stack: error.stack
+            }, 'error');
             throw error;
         }
 

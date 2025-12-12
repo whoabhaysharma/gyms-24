@@ -23,3 +23,6 @@
 2025-12-04 20:47:55 [[32minfo[39m]: [WhatsAppService] Message marked as read
 2025-12-04 20:47:55 [[32minfo[39m]: [TextHandler] Handling text message: "Thanks" {"from":"7210089184","name":"Abhay"}
 2025-12-04 20:47:55 [[32minfo[39m]: [TextHandler] No specific handler for message. Ignoring or sending fallback.
+2025-12-13 00:20:11 [[32minfo[39m]: [InvoiceService] Generating invoice PDF with PDFMake {"invoiceNumber":"INV-TEST-001"}
+2025-12-13 00:26:49 [[32minfo[39m]: [InvoiceService] Generating invoice PDF with PDFMake {"invoiceNumber":"INV-TEST-001"}
+2025-12-13 00:28:16 [[32minfo[39m]: [InvoiceService] Generating invoice PDF with PDFMake {"invoiceNumber":"INV-TEST-001"}

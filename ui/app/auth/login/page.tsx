@@ -26,7 +26,7 @@ export default function LoginPage() {
 
     // Basic validation
     if (!phoneNumber || phoneNumber.length < 10) {
-      toast.error('Please enter a valid 10-digit phone number.');
+      toast.error('Please Enter a valid 10-digit phone number.');
       return;
     }
 

@@ -26,4 +26,11 @@ export const config = {
     admin: {
         phoneNumber: process.env.ADMIN_PHONE_NUMBER,
     },
+
+    aws: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+        region: process.env.AWS_REGION || 'ap-south-1',
+        bucketName: process.env.AWS_BUCKET_NAME || '',
+    },
 };

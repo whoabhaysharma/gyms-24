@@ -303,22 +303,52 @@ export const subscriptionService = {
           }
         });
 
-        // Queue Invoice Generation
-        NotificationQueue.add('send-whatsapp', {
-          type: 'WHATSAPP_INVOICE',
-          payload: {
-            mobile: user.mobileNumber,
-            invoiceNumber: `INV-${payment.id.substring(0, 6).toUpperCase()}`,
-            date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-            userName: user.name,
-            gymName: payment.subscription.gym.name,
-            planName: payment.subscription.plan.name,
-            startDate: startDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-            expiryDate: endDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-            accessCode: fullSubscription?.accessCode,
-            amount: payment.amount.toLocaleString('en-IN')
-          }
-        });
+        // Generate and Upload Invoice
+        try {
+          const invoiceNumber = `INV-${payment.id.substring(0, 6).toUpperCase()}`;
+          const date = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+          const userName = user.name || 'Valued Member';
+          const gymName = payment.subscription.gym.name;
+          const planName = payment.subscription.plan.name;
+          const startDateStr = startDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+          const expiryDateStr = endDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+          const accessCode = fullSubscription?.accessCode || '';
+          const amount = payment.amount.toLocaleString('en-IN');
+
+          // 1. Generate PDF
+          const { generateInvoicePdf } = await import('./invoice.service');
+          const pdfBuffer = await generateInvoicePdf({
+            invoiceNumber,
+            date,
+            userName,
+            userMobile: user.mobileNumber,
+            gymName,
+            planName,
+            startDate: startDateStr,
+            expiryDate: expiryDateStr,
+            accessCode,
+            amount
+          });
+
+          // 2. Upload to S3
+          const { uploadToS3 } = await import('./storage.service');
+          const filename = `Invoice_${invoiceNumber}.pdf`;
+          const pdfUrl = await uploadToS3(pdfBuffer, filename, 'application/pdf');
+
+          // 3. Queue Notification with PDF URL
+          NotificationQueue.add('send-whatsapp', {
+            type: 'WHATSAPP_INVOICE',
+            payload: {
+              mobile: user.mobileNumber,
+              pdfUrl,
+              filename,
+              caption: 'Here is your invoice for the recent subscription.'
+            }
+          });
+
+        } catch (err) {
+          console.error('Failed to generate/upload invoice:', err);
+        }
       }
     } catch (error) {
       console.error('Failed to queue WhatsApp notification:', error);

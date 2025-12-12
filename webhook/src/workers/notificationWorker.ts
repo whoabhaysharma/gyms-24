@@ -1,8 +1,6 @@
 import { Worker, Job } from 'bullmq';
 import { connection } from '../queues/connection';
 import * as WhatsAppService from '../services/whatsapp';
-import * as InvoiceService from '../services/invoice';
-import * as StorageService from '../services/storage';
 import { logWithContext } from '../utils/logger';
 
 const NOTIFICATION_QUEUE_NAME = 'notification-queue';
@@ -68,32 +66,14 @@ const handleSendAccessCode = async (payload: any) => {
 };
 
 const handleSendInvoice = async (payload: any) => {
-    const { mobile, invoiceNumber, date, userName, gymName, planName, startDate, expiryDate, accessCode, amount } = payload;
+    const { mobile, pdfUrl, filename, caption } = payload;
 
-    if (!mobile) {
-        throw new Error('Missing mobile in payload');
+    if (!mobile || !pdfUrl) {
+        throw new Error('Missing mobile or pdfUrl in payload');
     }
 
     const cleanMobile = mobile.replace(/\D/g, '');
 
-    // 1. Generate PDF
-    const pdfBuffer = await InvoiceService.generateInvoicePdf({
-        invoiceNumber,
-        date,
-        userName,
-        userMobile: cleanMobile,
-        gymName,
-        planName,
-        startDate,
-        expiryDate,
-        accessCode,
-        amount
-    });
-
-    // 2. Upload PDF to S3
-    const filename = `Invoice_${invoiceNumber}.pdf`;
-    const s3Url = await StorageService.uploadToS3(pdfBuffer, filename, 'application/pdf');
-
-    // 3. Send Document Message using S3 URL
-    await WhatsAppService.sendDocument(cleanMobile, s3Url, filename, 'Here is your invoice for the recent subscription.');
+    // Send Document Message using S3 URL
+    await WhatsAppService.sendDocument(cleanMobile, pdfUrl, filename, caption || 'Here is your invoice.');
 };

@@ -1,5 +1,5 @@
 import PdfPrinter from 'pdfmake';
-import { logWithContext } from '../utils/logger';
+import logger from '../lib/logger';
 
 interface InvoiceData {
     invoiceNumber: string;
@@ -32,7 +32,7 @@ const fonts = {
 const printer = new PdfPrinter(fonts);
 
 export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => {
-    logWithContext('InvoiceService', 'Generating invoice PDF with PDFMake', { invoiceNumber: data.invoiceNumber });
+    logger.info('[InvoiceService] Generating invoice PDF with PDFMake', { invoiceNumber: data.invoiceNumber });
 
     try {
         const docDefinition: any = {
@@ -149,10 +149,10 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
                         ]
                     },
                     layout: {
-                        hLineWidth: (i: number) => 2,
-                        vLineWidth: (i: number) => 2,
-                        hLineColor: (i: number) => '#000',
-                        vLineColor: (i: number) => '#000',
+                        hLineWidth: (_: number) => 2,
+                        vLineWidth: (_: number) => 2,
+                        hLineColor: (_: number) => '#000',
+                        vLineColor: (_: number) => '#000',
                     },
                     margin: [0, 10, 0, 10]
                 },
@@ -192,8 +192,8 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
             pdfDoc.end();
         });
 
-    } catch (error) {
-        logWithContext('InvoiceService', 'Error generating invoice PDF', { error }, 'error');
+    } catch (error: any) {
+        logger.error('[InvoiceService] Error generating invoice PDF', { error: error.message });
         throw error;
     }
 };

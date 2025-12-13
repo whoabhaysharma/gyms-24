@@ -1,6 +1,7 @@
 import PDFDocument from 'pdfkit';
 import axios from 'axios';
 import logger from '../lib/logger';
+import QRCode from 'qrcode';
 
 interface InvoiceData {
     invoiceNumber: string;
@@ -198,4 +199,21 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
             reject(error);
         }
     });
+};
+
+export const generateQRCodeImage = async (text: string): Promise<Buffer> => {
+    try {
+        return await QRCode.toBuffer(text, {
+            errorCorrectionLevel: 'H',
+            margin: 1,
+            width: 300,
+            color: {
+                dark: '#000000',
+                light: '#ffffff'
+            }
+        });
+    } catch (error) {
+        logger.error('[InvoiceService] Error generating QR code image', { error });
+        throw error;
+    }
 };

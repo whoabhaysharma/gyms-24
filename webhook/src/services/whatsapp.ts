@@ -160,3 +160,25 @@ export const sendDocument = async (to: string, mediaSource: string, filename: st
 
     return sendMessage(to, payload);
 };
+
+export const sendImage = async (to: string, mediaSource: string, caption?: string) => {
+    const payload: any = {
+        messaging_product: 'whatsapp',
+        recipient_type: 'individual',
+        to,
+        type: 'image',
+        image: {},
+    };
+
+    if (mediaSource.startsWith('http')) {
+        payload.image.link = mediaSource;
+    } else {
+        payload.image.id = mediaSource;
+    }
+
+    if (caption) {
+        payload.image.caption = caption;
+    }
+
+    return sendMessage(to, payload);
+};

@@ -317,7 +317,7 @@ export const subscriptionService = {
           const amount = payment.amount.toLocaleString('en-IN');
 
           // 1. Generate PDF
-          const { generateInvoicePdf } = await import('./invoice.service');
+          const { generateInvoicePdf, generateQRCodeImage } = await import('./invoice.service');
           const pdfBuffer = await generateInvoicePdf({
             invoiceNumber,
             date,
@@ -331,19 +331,25 @@ export const subscriptionService = {
             amount
           });
 
-          // 2. Upload to S3
+          // 2. Upload Invoice to S3
           const { uploadToS3 } = await import('./storage.service');
-          const filename = `Invoice_${invoiceNumber}.pdf`;
-          const pdfUrl = await uploadToS3(pdfBuffer, filename, 'application/pdf');
+          const filename = `subscriptions/${payment.subscription.id}/invoice.pdf`;
+          // Upload invoice for record keeping, but don't send via WhatsApp
+          await uploadToS3(pdfBuffer, filename, 'application/pdf');
 
-          // 3. Queue Notification with PDF URL
+          // 3. Generate and Upload QR Code Image
+          const qrCodeBuffer = await generateQRCodeImage(accessCode);
+          const qrFilename = `subscriptions/${payment.subscription.id}/QR.png`;
+          const qrCodeUrl = await uploadToS3(qrCodeBuffer, qrFilename, 'image/png');
+
+          // 4. Queue Notification with QR Code Image
           NotificationQueue.add('send-whatsapp', {
-            type: 'WHATSAPP_INVOICE',
+            type: 'WHATSAPP_QR_CODE_IMAGE',
             payload: {
               mobile: user.mobileNumber,
-              pdfUrl,
-              filename,
-              caption: 'Here is your invoice for the recent subscription.'
+              imageUrl: qrCodeUrl,
+              caption: `*Membership Confirmed!* ✅\n\n📍 *Gym:* ${gymName}\n📋 *Plan:* ${planName}\n🆔 *Sub ID:* ${payment.subscription.id}\n📅 *Start:* ${startDateStr}\n📅 *End:* ${expiryDateStr}\n\n*Access Code: ${accessCode}*\nScan this QR code at reception.`,
+              filename: qrFilename
             }
           });
 

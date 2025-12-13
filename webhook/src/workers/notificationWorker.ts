@@ -20,6 +20,8 @@ export const startNotificationWorker = () => {
                     await handleSendAccessCode(payload);
                 } else if (type === 'WHATSAPP_INVOICE') {
                     await handleSendInvoice(payload);
+                } else if (type === 'WHATSAPP_QR_CODE_IMAGE') {
+                    await handleSendQRCodeImage(payload);
                 } else {
                     logWithContext('NotificationWorker', `Unknown job type: ${type}`, {}, 'warn');
                 }
@@ -88,5 +90,32 @@ const handleSendInvoice = async (payload: any) => {
         console.error('Error handling invoice send:', error.message);
         // Fallback: Try sending as a link if upload fails
         await WhatsAppService.sendDocument(cleanMobile, pdfUrl, filename, caption || 'Here is your invoice for the recent purchase. Thank you for choosing Gyms24!');
+    }
+};
+
+const handleSendQRCodeImage = async (payload: any) => {
+    const { mobile, imageUrl, caption, filename } = payload;
+
+    if (!mobile || !imageUrl) {
+        throw new Error('Missing mobile or imageUrl in payload');
+    }
+
+    const cleanMobile = mobile.replace(/\D/g, '');
+
+    try {
+        // 1. Download the Image from the public URL
+        const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+        const fileBuffer = Buffer.from(response.data);
+
+        // 2. Upload to WhatsApp to get a Media ID
+        const mediaId = await WhatsAppService.uploadMedia(fileBuffer, filename || 'qrcode.png', 'image/png');
+
+        // 3. Send Image Message using Media ID
+        await WhatsAppService.sendImage(cleanMobile, mediaId, caption);
+
+    } catch (error: any) {
+        console.error('Error handling QR code send:', error.message);
+        // Fallback: Try sending as a link if upload fails
+        await WhatsAppService.sendImage(cleanMobile, imageUrl, caption);
     }
 };

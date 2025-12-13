@@ -131,6 +131,7 @@ export const notificationsAPI = {
 
 export const adminAPI = {
   getDashboardStats: () => apiClient.get('/admin/dashboard-stats'),
+  getOtp: (mobile: string) => apiClient.get(`/admin/otp?mobile=${mobile}`),
 };
 
 export const auditLogsAPI = {

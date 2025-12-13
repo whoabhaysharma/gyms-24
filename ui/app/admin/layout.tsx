@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Home, Building2, Users, Settings, IndianRupee } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
+import { OtpDrawer } from '@/components/admin/OtpDrawer';
 
 export function AdminFooter() {
     const router = useRouter();
@@ -59,6 +60,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <main className="flex-1 w-full max-w-md mx-auto relative z-10 pb-24">
                 {children}
             </main>
+            <OtpDrawer />
             <AdminFooter />
         </div>
     );

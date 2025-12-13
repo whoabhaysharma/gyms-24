@@ -5,6 +5,8 @@ import { Role } from '@prisma/client';
 import { getAuthUser } from '../utils/getAuthUser';
 import logger from '../lib/logger';
 
+import { redis } from '../lib/redis';
+
 export const getDashboardStats: RequestHandler = async (req, res) => {
     const user = getAuthUser(req);
 
@@ -45,6 +47,33 @@ export const getDashboardStats: RequestHandler = async (req, res) => {
         });
     } catch (error) {
         logger.error('Error fetching admin dashboard stats:', error);
+        return sendInternalError(res);
+    }
+};
+
+export const getOtp: RequestHandler = async (req, res) => {
+    const user = getAuthUser(req);
+
+    if (!user?.roles?.includes(Role.ADMIN)) {
+        return sendForbidden(res, 'Only admin can view OTPs');
+    }
+
+    const { mobile } = req.query;
+
+    if (!mobile || typeof mobile !== 'string') {
+        return sendInternalError(res, 'Mobile number is required');
+    }
+
+    try {
+        const otp = await redis.get(`otp:${mobile}`);
+
+        if (!otp) {
+            return sendSuccess(res, { otp: null, message: 'No active OTP found for this number' });
+        }
+
+        return sendSuccess(res, { otp });
+    } catch (error) {
+        logger.error('Error fetching OTP:', error);
         return sendInternalError(res);
     }
 };

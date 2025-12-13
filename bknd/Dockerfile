@@ -23,20 +23,13 @@ RUN npm run build
 FROM node:18-alpine AS production
 WORKDIR /usr/src/app
 
-# Install Chromium and dependencies for Puppeteer
+# Install wkhtmltopdf and dependencies
 RUN apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    harfbuzz \
-    ca-certificates \
+    wkhtmltopdf \
     ttf-freefont \
-    nodejs \
-    yarn
+    fontconfig
 
-# Tell Puppeteer to skip installing Chrome. We'll be using the installed package.
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+# Remove Puppeteer environment variables as they are no longer needed
 
 # Install only production dependencies
 COPY package*.json ./

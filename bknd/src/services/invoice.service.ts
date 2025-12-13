@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer';
+import wkhtmltopdf from 'wkhtmltopdf';
 import logger from '../lib/logger';
 
 interface InvoiceData {
@@ -311,55 +311,52 @@ const HTML_TEMPLATE = `
 `;
 
 export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => {
-    logger.info('[InvoiceService] Generating invoice PDF with Puppeteer', { invoiceNumber: data.invoiceNumber });
+    logger.info('[InvoiceService] Generating invoice PDF with wkhtmltopdf', { invoiceNumber: data.invoiceNumber });
 
-    let browser;
-    try {
-        // Replace placeholders
-        let htmlContent = HTML_TEMPLATE
-            .replace('{{invoiceNumber}}', data.invoiceNumber)
-            .replace('{{date}}', data.date)
-            .replace('{{userName}}', data.userName)
-            .replace('{{userMobile}}', data.userMobile)
-            .replace('{{gymName}}', data.gymName)
-            .replace('{{planName}}', data.planName)
-            .replace('{{startDate}}', data.startDate)
-            .replace('{{expiryDate}}', data.expiryDate)
-            .replace('{{accessCode}}', data.accessCode)
-            .replace('{{amount}}', data.amount);
+    return new Promise((resolve, reject) => {
+        try {
+            // Replace placeholders
+            const htmlContent = HTML_TEMPLATE
+                .replace('{{invoiceNumber}}', data.invoiceNumber)
+                .replace('{{date}}', data.date)
+                .replace('{{userName}}', data.userName)
+                .replace('{{userMobile}}', data.userMobile)
+                .replace('{{gymName}}', data.gymName)
+                .replace('{{planName}}', data.planName)
+                .replace('{{startDate}}', data.startDate)
+                .replace('{{expiryDate}}', data.expiryDate)
+                .replace('{{accessCode}}', data.accessCode)
+                .replace('{{amount}}', data.amount);
 
-        // Launch Puppeteer
-        // Use system chromium if available (for Docker/Alpine), otherwise use default (bundled)
-        const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || undefined;
+            const options = {
+                pageSize: 'A4' as const,
+                marginTop: '0mm',
+                marginBottom: '0mm',
+                marginLeft: '0mm',
+                marginRight: '0mm',
+                printMediaType: true,
+            };
 
-        browser = await puppeteer.launch({
-            executablePath,
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-            headless: true
-        });
+            const chunks: Buffer[] = [];
+            const stream = wkhtmltopdf(htmlContent, options);
 
-        const page = await browser.newPage();
-        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+            stream.on('data', (chunk: Buffer) => {
+                chunks.push(chunk);
+            });
 
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            margin: {
-                top: '0px',
-                right: '0px',
-                bottom: '0px',
-                left: '0px'
-            }
-        });
+            stream.on('end', () => {
+                const pdfBuffer = Buffer.concat(chunks);
+                resolve(pdfBuffer);
+            });
 
-        return Buffer.from(pdfBuffer);
+            stream.on('error', (err: Error) => {
+                logger.error('[InvoiceService] Error in wkhtmltopdf stream', { error: err.message });
+                reject(err);
+            });
 
-    } catch (error: any) {
-        logger.error('[InvoiceService] Error generating invoice PDF', { error: error.message });
-        throw error;
-    } finally {
-        if (browser) {
-            await browser.close();
+        } catch (error: any) {
+            logger.error('[InvoiceService] Error generating invoice PDF', { error: error.message });
+            reject(error);
         }
-    }
+    });
 };

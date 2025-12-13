@@ -2,6 +2,7 @@ import { Worker, Job } from 'bullmq';
 import { connection } from '../queues/connection';
 import * as WhatsAppService from '../services/whatsapp';
 import { logWithContext } from '../utils/logger';
+import axios from 'axios';
 
 const NOTIFICATION_QUEUE_NAME = 'notification-queue';
 
@@ -71,6 +72,21 @@ const handleSendInvoice = async (payload: any) => {
 
     const cleanMobile = mobile.replace(/\D/g, '');
 
-    // Send Document Message using S3 URL
-    await WhatsAppService.sendDocument(cleanMobile, pdfUrl, filename, caption || 'Here is your invoice for the recent purchase. Thank you for choosing Gyms24!');
+    try {
+        // 1. Download the PDF from the public URL
+        const response = await axios.get(pdfUrl, { responseType: 'arraybuffer' });
+        const fileBuffer = Buffer.from(response.data);
+
+        // 2. Upload to WhatsApp to get a Media ID
+        // Note: WhatsApp API requires a mime type. We assume application/pdf for invoices.
+        const mediaId = await WhatsAppService.uploadMedia(fileBuffer, filename || 'invoice.pdf', 'application/pdf');
+
+        // 3. Send Document Message using Media ID
+        await WhatsAppService.sendDocument(cleanMobile, mediaId, filename, caption || 'Here is your invoice for the recent purchase. Thank you for choosing Gyms24!');
+
+    } catch (error: any) {
+        console.error('Error handling invoice send:', error.message);
+        // Fallback: Try sending as a link if upload fails
+        await WhatsAppService.sendDocument(cleanMobile, pdfUrl, filename, caption || 'Here is your invoice for the recent purchase. Thank you for choosing Gyms24!');
+    }
 };

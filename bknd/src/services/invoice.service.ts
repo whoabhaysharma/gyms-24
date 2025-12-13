@@ -22,7 +22,6 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
 
     return new Promise(async (resolve, reject) => {
         try {
-            // Setup document with slightly wider margins for a cleaner look
             const doc = new PDFDocument({ size: 'A4', margin: 40 });
             const buffers: Buffer[] = [];
 
@@ -34,11 +33,11 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
 
             // --- Colors & Styles ---
             const colors = {
-                primary: '#1a1a1a',      // Dark Charcoal/Black
-                secondary: '#555555',    // Medium Gray
-                lightGray: '#f3f4f6',    // Very light gray for backgrounds
-                border: '#e5e7eb',       // Light border color
-                accent: '#39FF14',       // Gyms24 Neon Green
+                primary: '#1a1a1a',
+                secondary: '#555555',
+                lightGray: '#f3f4f6',
+                border: '#e5e7eb',
+                accent: '#39FF14',
                 white: '#FFFFFF'
             };
 
@@ -62,38 +61,40 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
             // ==========================================
 
             // Top Accent Bar
-            doc.rect(0, 0, 595.28, 10).fill(colors.accent); // Full width A4
+            doc.rect(0, 0, 595.28, 10).fill(colors.accent);
 
             // Logo
             if (logoBuffer) {
                 doc.image(logoBuffer, 40, 40, { width: 60 });
             }
 
-            // Company Info (Left Aligned under logo)
+            // Company Info
             doc.fillColor(colors.primary).fontSize(20).font(fonts.bold).text('Gyms24', 110, 45);
             doc.fillColor(colors.secondary).fontSize(9).font(fonts.regular)
                 .text('Premium Fitness Network', 110, 68)
                 .text('www.gyms24.in', 110, 80);
 
-            // Invoice Details (Right Aligned)
-            // Invoice Details (Right Aligned)
+            // --- UPDATED: Invoice Details (Right Aligned) ---
+            // Moved X to 200 (was 300) and increased width to 355 to handle long strings
             doc.fillColor(colors.secondary).fontSize(9).font(fonts.bold)
-                .text('INVOICE NUMBER', 300, 45, { align: 'right', width: 250 });
-            doc.fillColor(colors.primary).fontSize(14).text(`#${data.invoiceNumber}`, 300, 58, { align: 'right', width: 250 });
+                .text('INVOICE NUMBER', 200, 45, { align: 'right', width: 355 });
+
+            // Reduced font size to 11 (was 14) to fit long IDs like #INVCMJ43SFNS0005M401JWDVVERQ
+            doc.fillColor(colors.primary).fontSize(11).font(fonts.bold)
+                .text(`#${data.invoiceNumber}`, 200, 58, { align: 'right', width: 355 });
 
             doc.fillColor(colors.secondary).fontSize(9).font(fonts.bold)
-                .text('DATE OF ISSUE', 300, 85, { align: 'right', width: 250 });
+                .text('DATE OF ISSUE', 200, 85, { align: 'right', width: 355 });
             doc.fillColor(colors.primary).fontSize(12).font(fonts.regular)
-                .text(data.date, 300, 98, { align: 'right', width: 250 });
+                .text(data.date, 200, 98, { align: 'right', width: 355 });
 
             doc.moveDown();
 
             // ==========================================
-            // CLIENT INFO SECTION (Boxed)
+            // CLIENT INFO SECTION
             // ==========================================
             const clientBoxTop = 130;
 
-            // Light background box
             doc.roundedRect(40, clientBoxTop, 515, 60, 5).fill(colors.lightGray);
 
             doc.fillColor(colors.secondary).fontSize(8).font(fonts.bold)
@@ -102,7 +103,6 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
             doc.fillColor(colors.primary).fontSize(14).font(fonts.bold)
                 .text(data.userName, 60, clientBoxTop + 30);
 
-            // Mobile Number on the right side of the box
             doc.fillColor(colors.secondary).fontSize(8).font(fonts.bold)
                 .text('MOBILE', 400, clientBoxTop + 15);
             doc.fillColor(colors.primary).fontSize(12).font(fonts.regular)
@@ -110,18 +110,16 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
 
 
             // ==========================================
-            // BOOKING DETAILS (Table Style)
+            // BOOKING DETAILS
             // ==========================================
             const tableTop = 220;
 
-            // Header Row
             doc.rect(40, tableTop, 515, 25).fill(colors.primary);
             doc.fillColor(colors.white).fontSize(9).font(fonts.bold);
             doc.text('DESCRIPTION / GYM NAME', 60, tableTop + 8);
             doc.text('PLAN', 350, tableTop + 8);
             doc.text('AMOUNT', 480, tableTop + 8);
 
-            // Row Content
             const rowY = tableTop + 35;
             doc.fillColor(colors.primary).fontSize(12).font(fonts.bold)
                 .text(data.gymName, 60, rowY, { width: 280, lineGap: 2 });
@@ -129,70 +127,56 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
             doc.fillColor(colors.secondary).fontSize(10).font(fonts.regular)
                 .text(data.planName, 350, rowY);
 
-            // UPDATED: Added INR label
             doc.fillColor(colors.primary).fontSize(12).font(fonts.bold)
                 .text(`INR ${data.amount}`, 480, rowY);
 
-            // Separator Line
             doc.strokeColor(colors.border).lineWidth(1)
                 .moveTo(40, rowY + 30).lineTo(555, rowY + 30).stroke();
 
-            // Total Section
-            // UPDATED: Added INR label
             doc.fillColor(colors.primary).fontSize(14).font(fonts.bold)
                 .text(`Total: INR ${data.amount}`, 40, rowY + 45, { align: 'right', width: 515 });
 
 
             // ==========================================
-            // ACCESS PASS (Ticket Style)
+            // ACCESS PASS
             // ==========================================
             const passTop = 350;
-            // UPDATED: Increased pass container height slightly to match bigger box
             const passHeight = 160;
 
-            // Label
             doc.fillColor(colors.secondary).fontSize(10).font(fonts.bold)
                 .text('YOUR MEMBERSHIP ACCESS PASS', 40, passTop - 20);
 
-            // Ticket Border (Dashed)
             doc.save();
             doc.strokeColor(colors.primary).lineWidth(1).dash(5, { space: 5 })
                 .rect(40, passTop, 515, passHeight).stroke();
             doc.restore();
 
-            // -- Left Side: Dates --
             doc.fillColor(colors.secondary).fontSize(9).font(fonts.bold).text('VALID FROM', 60, passTop + 40);
             doc.fillColor(colors.primary).fontSize(12).font(fonts.regular).text(data.startDate, 60, passTop + 55);
 
             doc.fillColor(colors.secondary).fontSize(9).font(fonts.bold).text('VALID UNTIL', 60, passTop + 90);
             doc.fillColor(colors.primary).fontSize(12).font(fonts.regular).text(data.expiryDate, 60, passTop + 105);
 
-            // -- Center: Status --
-            doc.roundedRect(220, passTop + 65, 80, 25, 12).fill('#dcfce7'); // Light green pill
+            doc.roundedRect(220, passTop + 65, 80, 25, 12).fill('#dcfce7');
             doc.fillColor('#166534').fontSize(10).font(fonts.bold).text('ACTIVE', 220, passTop + 72, { width: 80, align: 'center' });
 
-            // -- Right Side: The Code Box (UPDATED FOR LARGER SIZE) --
-            // Increased width to 210 (was 170) and height to 120 (was 100)
             const codeBoxW = 210;
             const codeBoxH = 120;
-            const codeBoxX = 555 - codeBoxW - 20; // Aligned to right with 20px padding
+            const codeBoxX = 555 - codeBoxW - 20;
             const codeBoxY = passTop + 20;
 
-
-            // Fill Box with Accent color
             doc.roundedRect(codeBoxX, codeBoxY, codeBoxW, codeBoxH, 8).fill(colors.primary);
 
-            doc.fillColor(colors.accent).fontSize(12).font(fonts.bold) // Font size increased to 12
+            doc.fillColor(colors.accent).fontSize(12).font(fonts.bold)
                 .text('ENTRY ACCESS CODE', codeBoxX, codeBoxY + 15, { width: codeBoxW, align: 'center' });
 
-            // White Box for code (Larger now)
             doc.roundedRect(codeBoxX + 25, codeBoxY + 40, codeBoxW - 50, 45, 4).fill(colors.white);
 
-            doc.fillColor(colors.primary).fontSize(26).font(fonts.mono) // Font size increased to 26
+            doc.fillColor(colors.primary).fontSize(26).font(fonts.mono)
                 .text(data.accessCode, codeBoxX + 25, codeBoxY + 52, { width: codeBoxW - 50, align: 'center', characterSpacing: 3 });
 
-            doc.fillColor('#aaaaaa').fontSize(8).font(fonts.regular)
-                .text('Show this code at reception', codeBoxX, codeBoxY + 95, { width: codeBoxW, align: 'center' });
+            doc.fillColor(colors.secondary).fontSize(8).font(fonts.regular)
+                .text('Show this code at reception', codeBoxX, codeBoxY + 95, { width: codeBoxW, align: 'center', color: '#aaaaaa' });
 
 
             // ==========================================

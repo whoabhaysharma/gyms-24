@@ -76,7 +76,7 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
                 .text('www.gyms24.in', 110, 80);
 
             // Invoice Details (Right Aligned)
-            const rightMargin = 555;
+            // Invoice Details (Right Aligned)
             doc.fillColor(colors.secondary).fontSize(9).font(fonts.bold)
                 .text('INVOICE NUMBER', 300, 45, { align: 'right', width: 250 });
             doc.fillColor(colors.primary).fontSize(14).text(`#${data.invoiceNumber}`, 300, 58, { align: 'right', width: 250 });
@@ -191,8 +191,8 @@ export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => 
             doc.fillColor(colors.primary).fontSize(26).font(fonts.mono) // Font size increased to 26
                 .text(data.accessCode, codeBoxX + 25, codeBoxY + 52, { width: codeBoxW - 50, align: 'center', characterSpacing: 3 });
 
-            doc.fillColor(colors.secondary).fontSize(8).font(fonts.regular)
-                .text('Show this code at reception', codeBoxX, codeBoxY + 95, { width: codeBoxW, align: 'center', color: '#aaaaaa' });
+            doc.fillColor('#aaaaaa').fontSize(8).font(fonts.regular)
+                .text('Show this code at reception', codeBoxX, codeBoxY + 95, { width: codeBoxW, align: 'center' });
 
 
             // ==========================================

@@ -1,12 +1,13 @@
 'use client'
 
-import { Users, Building2, Wallet, Activity, ArrowUpRight, ShieldCheck } from "lucide-react"
+import { Users, Building2, Wallet, Activity, ArrowUpRight, ShieldCheck, KeyRound } from "lucide-react"
 import { useAdminStatsQuery } from "@/lib/hooks/queries/useAdmin";
 import { useUnsettledSummaryQuery } from "@/lib/hooks/queries/useSettlements";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
+import { OtpDrawer } from "@/components/admin/OtpDrawer";
 
 // ---------------------------------------
 // Types
@@ -212,6 +213,14 @@ export default function AdminDashboard() {
             <Users className="w-5 h-5 text-zinc-600" />
             <span className="text-xs font-semibold text-zinc-600">Manage Users</span>
           </button>
+          <OtpDrawer trigger={
+            <button
+              className="col-span-2 flex flex-row items-center justify-center gap-3 bg-zinc-900 hover:bg-zinc-800 py-4 rounded-2xl transition-colors text-white"
+            >
+              <KeyRound className="w-5 h-5" />
+              <span className="text-sm font-semibold">Get User OTP</span>
+            </button>
+          } />
         </div>
       </div>
 

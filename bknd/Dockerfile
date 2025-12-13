@@ -23,14 +23,6 @@ RUN npm run build
 FROM node:18-alpine AS production
 WORKDIR /usr/src/app
 
-# Install wkhtmltopdf and dependencies
-RUN apk add --no-cache \
-    wkhtmltopdf \
-    ttf-freefont \
-    fontconfig
-
-# Remove Puppeteer environment variables as they are no longer needed
-
 # Install only production dependencies
 COPY package*.json ./
 RUN npm install --omit=dev

@@ -1,4 +1,5 @@
-import wkhtmltopdf from 'wkhtmltopdf';
+import PDFDocument from 'pdfkit';
+import axios from 'axios';
 import logger from '../lib/logger';
 
 interface InvoiceData {
@@ -14,345 +15,199 @@ interface InvoiceData {
     amount: string;
 }
 
-const HTML_TEMPLATE = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gyms24 Invoice - A4</title>
-    <style>
-        /* General Styling */
-        body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background-color: #fff; /* White for PDF */
-            color: #333;
-            margin: 0;
-            padding: 0;
-            -webkit-print-color-adjust: exact;
-        }
-
-        /* A4 Page Container */
-        .invoice-box {
-            background-color: #fff;
-            width: 100%;        /* Full width for PDF */
-            /* min-height: 297mm; */ /* Let content flow */
-            margin: 0 auto;
-            padding: 40px;       /* Internal padding */
-            box-sizing: border-box;
-            position: relative;
-        }
-
-        /* --- LOGO STYLING --- */
-        .logo-wrapper {
-            display: inline-flex;
-            align-items: baseline; 
-            margin-bottom: 25px;
-            text-decoration: none;
-        }
-
-        .logo-text {
-            font-family: 'Arial Black', 'Arial Bold', sans-serif;
-            font-size: 38px;
-            font-weight: 900;
-            color: #1a1a1a;
-            letter-spacing: -1.5px;
-            line-height: 1;
-        }
-
-        .logo-circle {
-            display: inline-block;
-            width: 10px; 
-            height: 10px;
-            background-color: #39FF14; /* Neon Green */
-            border-radius: 50%;
-            margin-left: 5px; 
-            margin-bottom: 2px;
-        }
-
-        /* Header Layout */
-        .header-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-        }
-
-        .header-table td {
-            vertical-align: top;
-        }
-
-        .text-light { color: #777; font-size: 14px; }
-        
-        /* Top Right Styling */
-        .header-right {
-            text-align: right;
-        }
-
-        .invoice-label {
-            font-size: 36px;
-            font-weight: 800;
-            color: #1a1a1a;
-            letter-spacing: 1px;
-            margin: 0;
-            line-height: 1;
-        }
-
-        .invoice-meta {
-            margin-top: 8px;
-            font-size: 16px;
-            color: #555;
-        }
-        
-        .meta-divider {
-            color: #ddd;
-            margin: 0 8px;
-        }
-
-        /* --- SUBSCRIPTION CARD DESIGN --- */
-        .member-card {
-            display: flex; 
-            border: 2px solid #000;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-top: 30px;
-            margin-bottom: 10px;
-            height: 220px; 
-        }
-
-        .card-details {
-            width: 65%;
-            padding: 25px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .gym-name {
-            font-size: 22px;
-            font-weight: 800;
-            text-transform: uppercase;
-            color: #000;
-            line-height: 1.2;
-        }
-
-        .plan-name {
-            font-size: 16px;
-            color: #555;
-            margin-top: 5px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
-            margin-bottom: 15px;
-        }
-
-        .date-row {
-            display: flex;
-            gap: 40px;
-        }
-
-        .date-box label {
-            font-size: 11px;
-            text-transform: uppercase;
-            color: #888;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .date-box div {
-            font-size: 16px;
-            font-weight: bold;
-            color: #000;
-        }
-
-        /* Access Code Section */
-        .card-code-section {
-            width: 35%;
-            background-color: #39FF14; /* Brand Neon Green */
-            color: #000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            border-left: 2px solid #000;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-
-        .code-label {
-            font-size: 14px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-            opacity: 0.8;
-        }
-
-        .access-code {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 36px;
-            font-weight: 900;
-            letter-spacing: 2px;
-            background: #fff;
-            padding: 10px 15px;
-            border: 2px solid #000;
-            box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
-            transform: rotate(-2deg); 
-        }
-        
-        .scan-instruction {
-            margin-top: 15px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        /* Totals */
-        .total-row {
-            text-align: right;
-            margin-top: 15px;
-            font-size: 20px;
-            font-weight: bold;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-        }
-
-        /* Footer */
-        .footer {
-            /* Positioned at bottom of A4 page */
-            position: absolute;
-            bottom: 40px;
-            left: 0;
-            right: 0;
-            width: 100%;
-            text-align: center;
-            font-size: 12px;
-            color: #999;
-            border-top: 1px solid #eee;
-            padding-top: 20px;
-        }
-        
-        .footer a { color: #333; text-decoration: none; font-weight: bold; }
-    </style>
-</head>
-<body>
-
-    <div class="invoice-box">
-        <table class="header-table">
-            <tr>
-                <td>
-                    <div class="logo-wrapper">
-                        <span class="logo-text">Gyms24</span>
-                        <span class="logo-circle"></span>
-                    </div>
-                    
-                    <div class="text-light">
-                        <strong>Online Booking Platform</strong><br>
-                        Email: help@gyms24.in<br>
-                        Web: www.gyms24.in
-                    </div>
-                </td>
-                
-                <td class="header-right">
-                    <h1 class="invoice-label">INVOICE</h1>
-                    <div class="invoice-meta">
-                        <span style="font-weight: bold; color: #000;">#{{invoiceNumber}}</span>
-                        <span class="meta-divider">|</span>
-                        <span>{{date}}</span>
-                    </div>
-                </td>
-            </tr>
-        </table>
-
-        <div style="margin-bottom: 20px;">
-            <div class="text-light" style="margin-bottom: 5px; font-size: 12px; text-transform: uppercase;">Billed To User</div>
-            <div style="font-size: 20px; font-weight: bold;">{{userName}}</div>
-            <div style="font-size: 16px; margin-top: 2px;">+91 {{userMobile}}</div>
-        </div>
-
-        <div class="member-card">
-            <div class="card-details">
-                <div>
-                    <div class="gym-name">{{gymName}}</div>
-                    <div class="plan-name">{{planName}}</div>
-                </div>
-                
-                <div class="date-row">
-                    <div class="date-box">
-                        <label>Start Date</label>
-                        <div>{{startDate}}</div>
-                    </div>
-                    <div class="date-box">
-                        <label>Expiry Date</label>
-                        <div>{{expiryDate}}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-code-section">
-                <div class="code-label">Access Code</div>
-                <div class="access-code">{{accessCode}}</div>
-                <div class="scan-instruction">Show at Reception</div>
-            </div>
-        </div>
-
-        <div class="total-row">
-            Paid Amount: ₹{{amount}}
-        </div>
-
-        <div class="footer">
-            <p>Thank you for choosing Gyms24.</p>
-            <p>Need help? Email <strong>help@gyms24.in</strong> or visit <a href="https://www.gyms24.in">www.gyms24.in</a></p>
-        </div>
-    </div>
-
-</body>
-</html>
-`;
+const LOGO_URL = 'https://pub-aeee1a0e623942388891105d555f09c0.r2.dev/gyms24.png';
 
 export const generateInvoicePdf = async (data: InvoiceData): Promise<Buffer> => {
-    logger.info('[InvoiceService] Generating invoice PDF with wkhtmltopdf', { invoiceNumber: data.invoiceNumber });
+    logger.info('[InvoiceService] Generating invoice PDF with PDFKit', { invoiceNumber: data.invoiceNumber });
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         try {
-            // Replace placeholders
-            const htmlContent = HTML_TEMPLATE
-                .replace('{{invoiceNumber}}', data.invoiceNumber)
-                .replace('{{date}}', data.date)
-                .replace('{{userName}}', data.userName)
-                .replace('{{userMobile}}', data.userMobile)
-                .replace('{{gymName}}', data.gymName)
-                .replace('{{planName}}', data.planName)
-                .replace('{{startDate}}', data.startDate)
-                .replace('{{expiryDate}}', data.expiryDate)
-                .replace('{{accessCode}}', data.accessCode)
-                .replace('{{amount}}', data.amount);
+            // Setup document with slightly wider margins for a cleaner look
+            const doc = new PDFDocument({ size: 'A4', margin: 40 });
+            const buffers: Buffer[] = [];
 
-            const options = {
-                pageSize: 'A4' as const,
-                marginTop: '0mm',
-                marginBottom: '0mm',
-                marginLeft: '0mm',
-                marginRight: '0mm',
-                printMediaType: true,
+            doc.on('data', buffers.push.bind(buffers));
+            doc.on('end', () => {
+                const pdfData = Buffer.concat(buffers);
+                resolve(pdfData);
+            });
+
+            // --- Colors & Styles ---
+            const colors = {
+                primary: '#1a1a1a',      // Dark Charcoal/Black
+                secondary: '#555555',    // Medium Gray
+                lightGray: '#f3f4f6',    // Very light gray for backgrounds
+                border: '#e5e7eb',       // Light border color
+                accent: '#39FF14',       // Gyms24 Neon Green
+                white: '#FFFFFF'
             };
 
-            const chunks: Buffer[] = [];
-            const stream = wkhtmltopdf(htmlContent, options);
+            const fonts = {
+                bold: 'Helvetica-Bold',
+                regular: 'Helvetica',
+                mono: 'Courier-Bold'
+            };
 
-            stream.on('data', (chunk: Buffer) => {
-                chunks.push(chunk);
-            });
+            // --- Asset Fetching ---
+            let logoBuffer: Buffer | null = null;
+            try {
+                const response = await axios.get(LOGO_URL, { responseType: 'arraybuffer' });
+                logoBuffer = Buffer.from(response.data);
+            } catch (error: any) {
+                logger.warn('[InvoiceService] Failed to fetch logo', { error: error.message });
+            }
 
-            stream.on('end', () => {
-                const pdfBuffer = Buffer.concat(chunks);
-                resolve(pdfBuffer);
-            });
+            // ==========================================
+            // HEADER SECTION
+            // ==========================================
 
-            stream.on('error', (err: Error) => {
-                logger.error('[InvoiceService] Error in wkhtmltopdf stream', { error: err.message });
-                reject(err);
-            });
+            // Top Accent Bar
+            doc.rect(0, 0, 595.28, 10).fill(colors.accent); // Full width A4
+
+            // Logo
+            if (logoBuffer) {
+                doc.image(logoBuffer, 40, 40, { width: 60 });
+            }
+
+            // Company Info (Left Aligned under logo)
+            doc.fillColor(colors.primary).fontSize(20).font(fonts.bold).text('Gyms24', 110, 45);
+            doc.fillColor(colors.secondary).fontSize(9).font(fonts.regular)
+                .text('Premium Fitness Network', 110, 68)
+                .text('www.gyms24.in', 110, 80);
+
+            // Invoice Details (Right Aligned)
+            const rightMargin = 555;
+            doc.fillColor(colors.secondary).fontSize(9).font(fonts.bold)
+                .text('INVOICE NUMBER', 300, 45, { align: 'right', width: 250 });
+            doc.fillColor(colors.primary).fontSize(14).text(`#${data.invoiceNumber}`, 300, 58, { align: 'right', width: 250 });
+
+            doc.fillColor(colors.secondary).fontSize(9).font(fonts.bold)
+                .text('DATE OF ISSUE', 300, 85, { align: 'right', width: 250 });
+            doc.fillColor(colors.primary).fontSize(12).font(fonts.regular)
+                .text(data.date, 300, 98, { align: 'right', width: 250 });
+
+            doc.moveDown();
+
+            // ==========================================
+            // CLIENT INFO SECTION (Boxed)
+            // ==========================================
+            const clientBoxTop = 130;
+
+            // Light background box
+            doc.roundedRect(40, clientBoxTop, 515, 60, 5).fill(colors.lightGray);
+
+            doc.fillColor(colors.secondary).fontSize(8).font(fonts.bold)
+                .text('BILLED TO', 60, clientBoxTop + 15);
+
+            doc.fillColor(colors.primary).fontSize(14).font(fonts.bold)
+                .text(data.userName, 60, clientBoxTop + 30);
+
+            // Mobile Number on the right side of the box
+            doc.fillColor(colors.secondary).fontSize(8).font(fonts.bold)
+                .text('MOBILE', 400, clientBoxTop + 15);
+            doc.fillColor(colors.primary).fontSize(12).font(fonts.regular)
+                .text(`+91 ${data.userMobile}`, 400, clientBoxTop + 30);
+
+
+            // ==========================================
+            // BOOKING DETAILS (Table Style)
+            // ==========================================
+            const tableTop = 220;
+
+            // Header Row
+            doc.rect(40, tableTop, 515, 25).fill(colors.primary);
+            doc.fillColor(colors.white).fontSize(9).font(fonts.bold);
+            doc.text('DESCRIPTION / GYM NAME', 60, tableTop + 8);
+            doc.text('PLAN', 350, tableTop + 8);
+            doc.text('AMOUNT', 480, tableTop + 8);
+
+            // Row Content
+            const rowY = tableTop + 35;
+            doc.fillColor(colors.primary).fontSize(12).font(fonts.bold)
+                .text(data.gymName, 60, rowY, { width: 280, lineGap: 2 });
+
+            doc.fillColor(colors.secondary).fontSize(10).font(fonts.regular)
+                .text(data.planName, 350, rowY);
+
+            // UPDATED: Added INR label
+            doc.fillColor(colors.primary).fontSize(12).font(fonts.bold)
+                .text(`INR ${data.amount}`, 480, rowY);
+
+            // Separator Line
+            doc.strokeColor(colors.border).lineWidth(1)
+                .moveTo(40, rowY + 30).lineTo(555, rowY + 30).stroke();
+
+            // Total Section
+            // UPDATED: Added INR label
+            doc.fillColor(colors.primary).fontSize(14).font(fonts.bold)
+                .text(`Total: INR ${data.amount}`, 40, rowY + 45, { align: 'right', width: 515 });
+
+
+            // ==========================================
+            // ACCESS PASS (Ticket Style)
+            // ==========================================
+            const passTop = 350;
+            // UPDATED: Increased pass container height slightly to match bigger box
+            const passHeight = 160;
+
+            // Label
+            doc.fillColor(colors.secondary).fontSize(10).font(fonts.bold)
+                .text('YOUR MEMBERSHIP ACCESS PASS', 40, passTop - 20);
+
+            // Ticket Border (Dashed)
+            doc.save();
+            doc.strokeColor(colors.primary).lineWidth(1).dash(5, { space: 5 })
+                .rect(40, passTop, 515, passHeight).stroke();
+            doc.restore();
+
+            // -- Left Side: Dates --
+            doc.fillColor(colors.secondary).fontSize(9).font(fonts.bold).text('VALID FROM', 60, passTop + 40);
+            doc.fillColor(colors.primary).fontSize(12).font(fonts.regular).text(data.startDate, 60, passTop + 55);
+
+            doc.fillColor(colors.secondary).fontSize(9).font(fonts.bold).text('VALID UNTIL', 60, passTop + 90);
+            doc.fillColor(colors.primary).fontSize(12).font(fonts.regular).text(data.expiryDate, 60, passTop + 105);
+
+            // -- Center: Status --
+            doc.roundedRect(220, passTop + 65, 80, 25, 12).fill('#dcfce7'); // Light green pill
+            doc.fillColor('#166534').fontSize(10).font(fonts.bold).text('ACTIVE', 220, passTop + 72, { width: 80, align: 'center' });
+
+            // -- Right Side: The Code Box (UPDATED FOR LARGER SIZE) --
+            // Increased width to 210 (was 170) and height to 120 (was 100)
+            const codeBoxW = 210;
+            const codeBoxH = 120;
+            const codeBoxX = 555 - codeBoxW - 20; // Aligned to right with 20px padding
+            const codeBoxY = passTop + 20;
+
+
+            // Fill Box with Accent color
+            doc.roundedRect(codeBoxX, codeBoxY, codeBoxW, codeBoxH, 8).fill(colors.primary);
+
+            doc.fillColor(colors.accent).fontSize(12).font(fonts.bold) // Font size increased to 12
+                .text('ENTRY ACCESS CODE', codeBoxX, codeBoxY + 15, { width: codeBoxW, align: 'center' });
+
+            // White Box for code (Larger now)
+            doc.roundedRect(codeBoxX + 25, codeBoxY + 40, codeBoxW - 50, 45, 4).fill(colors.white);
+
+            doc.fillColor(colors.primary).fontSize(26).font(fonts.mono) // Font size increased to 26
+                .text(data.accessCode, codeBoxX + 25, codeBoxY + 52, { width: codeBoxW - 50, align: 'center', characterSpacing: 3 });
+
+            doc.fillColor(colors.secondary).fontSize(8).font(fonts.regular)
+                .text('Show this code at reception', codeBoxX, codeBoxY + 95, { width: codeBoxW, align: 'center', color: '#aaaaaa' });
+
+
+            // ==========================================
+            // FOOTER
+            // ==========================================
+            const footerY = 750;
+
+            doc.strokeColor(colors.border).lineWidth(1).moveTo(40, footerY).lineTo(555, footerY).stroke();
+
+            doc.fontSize(8).font(fonts.regular).fillColor(colors.secondary)
+                .text('Thank you for choosing Gyms24. This is a computer-generated invoice.', 40, footerY + 15, { align: 'center' });
+
+            doc.text('Support: help@gyms24.in | +91 99999 99999', 40, footerY + 28, { align: 'center' });
+
+            doc.end();
 
         } catch (error: any) {
             logger.error('[InvoiceService] Error generating invoice PDF', { error: error.message });

@@ -1,7 +1,7 @@
 import Fastify from 'fastify';
 import dotenv from 'dotenv';
 import routes from './routes';
-import '../workers/notificationWorker'; // Initialize notification worker
+import { startNotificationWorker } from '../workers/notificationWorker';
 import '../workers/worker'; // Initialize message processing worker
 
 dotenv.config();
@@ -16,6 +16,10 @@ server.register(routes);
 const start = async () => {
     try {
         const port = parseInt(process.env.PORT || '3000');
+
+        // Start workers
+        startNotificationWorker();
+
         await server.listen({ port, host: '0.0.0.0' });
         console.log(`Server listening on port ${port}`);
     } catch (err) {

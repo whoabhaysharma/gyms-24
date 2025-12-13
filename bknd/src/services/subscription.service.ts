@@ -305,7 +305,8 @@ export const subscriptionService = {
 
         // Generate and Upload Invoice
         try {
-          const invoiceNumber = `INV-${payment.id.substring(0, 6).toUpperCase()}`;
+          // Standard Practice: Use full unique identifier for traceability
+          const invoiceNumber = `INV-${payment.id.toUpperCase()}`;
           const date = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
           const userName = user.name || 'Valued Member';
           const gymName = payment.subscription.gym.name;

@@ -3,7 +3,7 @@ import { paymentService } from './payment.service';
 import { notificationService } from './notification.service';
 import { NotificationEvent } from '../types/notification-events';
 
-import { NotificationQueue } from '@queues';
+import { NotificationQueue, InvoiceQueue } from '@queues';
 import { logAction } from './audit.service';
 import { generateAccessCode } from '../utils/generators';
 
@@ -316,9 +316,8 @@ export const subscriptionService = {
           const accessCode = fullSubscription?.accessCode || '';
           const amount = payment.amount.toLocaleString('en-IN');
 
-          // 1. Generate PDF
-          const { generateInvoicePdf, generateQRCodeImage } = await import('./invoice.service');
-          const pdfBuffer = await generateInvoicePdf({
+          // Queue Invoice Generation
+          const invoiceData = {
             invoiceNumber,
             date,
             userName,
@@ -329,27 +328,15 @@ export const subscriptionService = {
             expiryDate: expiryDateStr,
             accessCode,
             amount
-          });
+          };
 
-          // 2. Upload Invoice to S3
-          const { uploadToS3 } = await import('./storage.service');
-          const filename = `subscriptions/${payment.subscription.id}/invoice.pdf`;
-          // Upload invoice for record keeping, but don't send via WhatsApp
-          await uploadToS3(pdfBuffer, filename, 'application/pdf');
-
-          // 3. Generate and Upload QR Code Image
-          const qrCodeBuffer = await generateQRCodeImage(accessCode);
-          const qrFilename = `subscriptions/${payment.subscription.id}/QR.png`;
-          const qrCodeUrl = await uploadToS3(qrCodeBuffer, qrFilename, 'image/png');
-
-          // 4. Queue Notification with QR Code Image
-          NotificationQueue.add('send-whatsapp', {
-            type: 'WHATSAPP_QR_CODE_IMAGE',
-            payload: {
+          InvoiceQueue.add('generate-invoice', {
+            subscriptionId: payment.subscription.id,
+            invoiceData,
+            shouldSendWhatsapp: true,
+            whatsappPayload: {
               mobile: user.mobileNumber,
-              imageUrl: qrCodeUrl,
               caption: `*Membership Confirmed!* ✅\n\n📍 *Gym:* ${gymName}\n📋 *Plan:* ${planName}\n🆔 *Sub ID:* ${payment.subscription.id}\n📅 *Start:* ${startDateStr}\n📅 *End:* ${expiryDateStr}\n\n*Access Code: ${accessCode}*\nScan this QR code at reception.`,
-              filename: qrFilename
             }
           });
 
@@ -608,6 +595,47 @@ export const subscriptionService = {
           gymName: gym.name
         }
       );
+    }
+
+    // Generate Invoice and QR Code (But DO NOT send via WhatsApp)
+    try {
+      const userDetails = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { name: true, mobileNumber: true }
+      });
+
+      const invoiceNumber = `INV-CONSOLE-${subscription.id.substring(0, 8).toUpperCase()}`;
+      const date = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      const userName = userDetails?.name || 'Valued Member';
+      const gymName = gym.name;
+      const planName = plan.name;
+      const startDateStr = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      const expiryDateStr = endDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      const accessCode = subscription.accessCode;
+      const amount = plan.price.toLocaleString('en-IN');
+
+      const invoiceData = {
+        invoiceNumber,
+        date,
+        userName,
+        userMobile: userDetails?.mobileNumber || '',
+        gymName,
+        planName,
+        startDate: startDateStr,
+        expiryDate: expiryDateStr,
+        accessCode,
+        amount
+      };
+
+      // Queue Invoice Generation (No WhatsApp)
+      InvoiceQueue.add('generate-invoice', {
+        subscriptionId: subscription.id,
+        invoiceData,
+        shouldSendWhatsapp: false
+      });
+
+    } catch (err) {
+      console.error('Failed to queue invoice generation for console subscription:', err);
     }
 
     if (actorId) {

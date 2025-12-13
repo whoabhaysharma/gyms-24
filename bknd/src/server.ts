@@ -1,6 +1,7 @@
 import app from './app';
 import { initializeAdmin } from './lib/initializeAdmin';
 import './workers/paymentWorker'; // Initialize worker
+import './workers/invoiceWorker'; // Initialize worker
 import { initAuditWorker } from './workers/audit.worker';
 import { config } from './config/config';
 

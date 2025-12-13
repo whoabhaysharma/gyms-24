@@ -55,12 +55,9 @@ const handleSendAccessCode = async (payload: any) => {
         throw new Error('Missing mobile or accessCode in payload');
     }
 
-    // Format mobile number (ensure no + or spaces, add country code if needed)
-    // Assuming payload comes with clean number or we trust the backend
-    // But for safety, let's strip non-digits
     const cleanMobile = mobile.replace(/\D/g, '');
 
-    const message = `Payment Successful! 🎉\n\nYour membership is now active.\n\n🏋️ *${gymName}*\n📦 ${planName}\n📅 Expires: ${new Date(endDate).toLocaleDateString()}\n\n🔑 *Access Code: ${accessCode}*\n\nShow this code at the gym reception to enter.`;
+    const message = `*Membership Active!* 🏋️‍♂️\n\n📍 *${gymName}*\n📋 ${planName}\n📅 Valid: ${new Date(endDate).toLocaleDateString()}\n\n🔑 *Code: ${accessCode}*\n(Show at reception)\n\n📄 _Invoice will be sent shortly._`;
 
     await WhatsAppService.sendMessage(cleanMobile, message);
 };
@@ -75,5 +72,5 @@ const handleSendInvoice = async (payload: any) => {
     const cleanMobile = mobile.replace(/\D/g, '');
 
     // Send Document Message using S3 URL
-    await WhatsAppService.sendDocument(cleanMobile, pdfUrl, filename, caption || 'Here is your invoice.');
+    await WhatsAppService.sendDocument(cleanMobile, pdfUrl, filename, caption || 'Here is your invoice for the recent purchase. Thank you for choosing Gyms24!');
 };
